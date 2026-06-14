@@ -1,0 +1,15 @@
+# Excel temp files
+*.xlsx
+~$*
+
+# .NET
+**/bin/
+**/obj/
+
+# Next.js
+**/node_modules/
+**/.next/
+
+# Environment files
+.env
+.env.local

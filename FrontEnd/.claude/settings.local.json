@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"d:\\\\Dotnet\\\\RoleBased ECommerce Platform\\\\ECommerce\\\\ECommerce\" -Directory | ForEach-Object { $_.Name })",
+      "PowerShell(Get-ChildItem \"d:\\\\Dotnet\\\\RoleBased ECommerce Platform\\\\FrontEnd\" -Force | ForEach-Object { $_.Name; if\\($_.PSIsContainer\\) { \"  [Directory]\" } else { \"  [File]\" } })"
+    ]
+  }
+}
