@@ -10,14 +10,20 @@ export interface Toast {
   message: string;
 }
 
+export type Theme = "light" | "dark";
+
 interface UiState {
   cartDrawerOpen: boolean;
   toasts: Toast[];
+  theme: Theme;
+  themeHydrated: boolean;
 }
 
 const initialState: UiState = {
   cartDrawerOpen: false,
   toasts: [],
+  theme: "dark",
+  themeHydrated: false,
 };
 
 const uiSlice = createSlice({
@@ -38,8 +44,28 @@ const uiSlice = createSlice({
     dismissToast(state, action: PayloadAction<string>) {
       state.toasts = state.toasts.filter((t) => t.id !== action.payload);
     },
+    hydrateTheme(state) {
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem("edgecart_theme") as Theme | null;
+        state.theme = stored ?? "dark";
+      }
+      state.themeHydrated = true;
+    },
+    setTheme(state, action: PayloadAction<Theme>) {
+      state.theme = action.payload;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("edgecart_theme", action.payload);
+      }
+    },
+    toggleTheme(state) {
+      state.theme = state.theme === "dark" ? "light" : "dark";
+      if (typeof window !== "undefined") {
+        localStorage.setItem("edgecart_theme", state.theme);
+      }
+    },
   },
 });
 
-export const { setCartDrawer, pushToast, dismissToast } = uiSlice.actions;
+export const { setCartDrawer, pushToast, dismissToast, hydrateTheme, setTheme, toggleTheme } =
+  uiSlice.actions;
 export default uiSlice.reducer;

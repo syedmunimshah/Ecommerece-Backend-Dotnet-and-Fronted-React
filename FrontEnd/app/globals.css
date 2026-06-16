@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root,
+  [data-theme="dark"] {
     color-scheme: dark;
     --bg: #0a0a0f;
     --surface: #13131a;
@@ -20,6 +21,23 @@
     --warning: #f59e0b;
   }
 
+  [data-theme="light"] {
+    color-scheme: light;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --elevated: #f1f5f9;
+    --border: #e2e8f0;
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-fg: #ffffff;
+    --accent: #3b82f6;
+    --fg: #0f172a;
+    --muted: #64748b;
+    --destructive: #dc2626;
+    --success: #16a34a;
+    --warning: #d97706;
+  }
+
   html,
   body {
     background-color: var(--bg);
@@ -30,9 +48,18 @@
 
   body {
     min-height: 100vh;
+  }
+
+  [data-theme="dark"] body {
     background-image:
       radial-gradient(1200px 600px at 20% -10%, rgba(59, 130, 246, 0.10), transparent 60%),
       radial-gradient(1000px 500px at 100% 0%, rgba(96, 165, 250, 0.06), transparent 60%);
+  }
+
+  [data-theme="light"] body {
+    background-image:
+      radial-gradient(1200px 600px at 20% -10%, rgba(37, 99, 235, 0.06), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(59, 130, 246, 0.04), transparent 60%);
   }
 
   ::selection {
@@ -56,8 +83,88 @@
     @apply rounded-lg border border-border bg-surface;
   }
 
+  .card-interactive {
+    @apply card transition-all duration-300;
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-0.25rem);
+    border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+    box-shadow: 0 12px 40px -12px rgb(0 0 0 / 0.35);
+  }
+
   .input-base {
     @apply w-full rounded border border-border bg-elevated px-3 py-2 text-sm text-foreground
-           placeholder:text-muted focus:border-primary focus:outline-none;
+           placeholder:text-muted focus:outline-none transition-colors duration-200;
+  }
+
+  .input-base:focus {
+    border-color: var(--primary);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, var(--primary), var(--accent), var(--primary));
+    background-size: 200% auto;
+    animation: gradient-shift 6s ease infinite;
+  }
+
+  .hero-orb {
+    @apply pointer-events-none absolute rounded-full blur-3xl;
+    animation: pulseGlow 4s ease-in-out infinite;
+  }
+
+  .nav-link {
+    @apply relative text-muted transition-colors duration-200 hover:text-foreground;
+  }
+
+  .nav-link::after {
+    @apply absolute -bottom-0.5 left-0 h-0.5 w-0 bg-accent transition-all duration-300 content-[''];
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  .stagger-1 { animation-delay: 100ms; }
+  .stagger-2 { animation-delay: 200ms; }
+  .stagger-3 { animation-delay: 300ms; }
+  .stagger-4 { animation-delay: 400ms; }
+  .stagger-5 { animation-delay: 500ms; }
+  .stagger-6 { animation-delay: 600ms; }
+
+  .opacity-0-start {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-interactive,
+  .card-interactive:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .text-gradient,
+  .hero-orb {
+    animation: none !important;
+  }
+
+  .motion-safe\:animate-gradient-shift,
+  .motion-safe\:animate-pulseGlow,
+  .motion-safe\:animate-float,
+  .motion-safe\:animate-float-slow,
+  .motion-safe\:animate-marquee,
+  .motion-safe\:animate-bounce-soft {
+    animation: none !important;
+  }
+
+  .motion-safe\:transition-all,
+  .motion-safe\:transition-colors,
+  .motion-safe\:transition-transform,
+  .motion-safe\:duration-300,
+  .motion-safe\:duration-200,
+  .motion-safe\:ease-out {
+    transition: none !important;
   }
 }

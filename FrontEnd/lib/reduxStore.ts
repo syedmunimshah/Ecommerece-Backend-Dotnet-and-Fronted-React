@@ -8,12 +8,16 @@ import {
 } from "react-redux";
 import authReducer from "@/features/auth/authSlice";
 import uiReducer from "@/features/ui/uiSlice";
+import wishlistReducer from "@/features/wishlist/wishlistSlice";
+import compareReducer from "@/features/compare/compareSlice";
 
 export const makeStore = () =>
   configureStore({
     reducer: {
       auth: authReducer,
       ui: uiReducer,
+      wishlist: wishlistReducer,
+      compare: compareReducer,
     },
   });
 

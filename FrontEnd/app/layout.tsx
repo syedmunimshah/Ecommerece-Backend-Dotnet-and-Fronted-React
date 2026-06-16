@@ -5,6 +5,7 @@ import { Providers } from "./providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/Toast";
+import { PageTransition } from "@/components/motion/PageTransition";
 import { getServerUser } from "@/lib/jwt";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -26,11 +27,13 @@ export default async function RootLayout({
   const user = await getServerUser().catch(() => null);
 
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} data-theme="dark" suppressHydrationWarning>
       <body suppressHydrationWarning className="flex min-h-screen flex-col font-[family-name:var(--font-geist-sans)] antialiased">
         <Providers initialUser={user}>
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <Footer />
           <Toaster />
         </Providers>

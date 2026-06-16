@@ -97,7 +97,7 @@ export function CheckoutClient() {
           amount={order.TotalAmount}
           onSuccess={(p) => {
             setPayment(p);
-            setStep("complete");
+            router.push(`/checkout/success?orderId=${order.Id}`);
           }}
         />
       </div>

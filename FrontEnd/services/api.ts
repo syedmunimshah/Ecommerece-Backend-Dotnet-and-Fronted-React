@@ -1,19 +1,31 @@
-import axios, { AxiosError, type AxiosInstance } from "axios";
+import axios, { AxiosError, type AxiosInstance, type AxiosResponse } from "axios";
 import { ApiError } from "@/types/api";
+import { normalizeKeys } from "@/lib/normalize";
 
 const isServer = typeof window === "undefined";
 
+function normalizeResponse<T>(response: AxiosResponse<T>): AxiosResponse<T> {
+  response.data = normalizeKeys<T>(response.data);
+  return response;
+}
+
 function attachErrorInterceptor(instance: AxiosInstance) {
   instance.interceptors.response.use(
-    (r) => r,
+    (response) => normalizeResponse(response),
     (error: AxiosError) => {
       const status = error.response?.status ?? 0;
       const data = error.response?.data as { message?: string } | string | undefined;
-      const message =
+
+      let message =
         (typeof data === "object" && data?.message) ||
         (typeof data === "string" && data) ||
         error.message ||
         "Request failed";
+
+      if (error.code === "ECONNREFUSED" || error.code === "ERR_NETWORK") {
+        message = "Backend API is not reachable. Start the .NET server at http://localhost:5241";
+      }
+
       throw new ApiError(status, message, data);
     },
   );
@@ -22,8 +34,6 @@ function attachErrorInterceptor(instance: AxiosInstance) {
 
 /**
  * Server-only axios pointed directly at the .NET backend.
- * Caller must attach `Authorization: Bearer <token>` per-request from cookie.
- * Use only inside Server Components / Route Handlers / Server Actions.
  */
 export function makeServerApi(token?: string | null): AxiosInstance {
   if (!isServer) {
@@ -40,10 +50,7 @@ export function makeServerApi(token?: string | null): AxiosInstance {
   return attachErrorInterceptor(instance);
 }
 
-/**
- * Client-side axios pointed at /api/bff/*.
- * The BFF route handlers attach the JWT from the HTTP-only cookie.
- */
+/** Client-side axios pointed at /api/bff/* */
 export const bffApi: AxiosInstance = attachErrorInterceptor(
   axios.create({
     baseURL: "/api/bff",

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -62,6 +63,11 @@ export function LoginForm() {
       <FormField label="Password" error={errors.Password?.message}>
         <Input type="password" autoComplete="current-password" {...register("Password")} />
       </FormField>
+      <div className="text-right">
+        <Link href="/forgot-password" className="text-sm text-accent hover:underline">
+          Forgot password?
+        </Link>
+      </div>
       <Button type="submit" loading={submitting} className="w-full">
         Sign in
       </Button>

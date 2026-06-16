@@ -7,6 +7,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { makeStore, type AppStore } from "@/lib/reduxStore";
 import { makeQueryClient } from "@/lib/queryClient";
 import { setUser } from "@/features/auth/authSlice";
+import { ThemeProvider } from "@/features/ui/ThemeProvider";
+import { ClientHydration } from "@/features/ui/ClientHydration";
 import type { AppUser } from "@/types/auth";
 
 export function Providers({
@@ -27,7 +29,10 @@ export function Providers({
   return (
     <ReduxProvider store={storeRef.current}>
       <QueryClientProvider client={queryRef.current}>
-        {children}
+        <ThemeProvider>
+          <ClientHydration />
+          {children}
+        </ThemeProvider>
         {process.env.NODE_ENV !== "production" && (
           <ReactQueryDevtools initialIsOpen={false} />
         )}
