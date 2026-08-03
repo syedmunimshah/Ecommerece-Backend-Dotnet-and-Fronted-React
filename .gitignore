@@ -1,0 +1,27 @@
+# Excel temp/autosave files
+*.xlsx
+~$*
+
+# Database dumps/backups
+**/database/backup*
+*.bak
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Node / Next.js
+**/node_modules/
+**/.next/
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.local
+.env*.local
+
+# IDE / OS
+.vs/
+*.user
+.DS_Store
+Thumbs.db
