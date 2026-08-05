@@ -95,6 +95,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Required before the build steps below: the default docker driver cannot export
+      # a build cache, so cache-to: type=gha fails immediately without buildx.
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
       # Proves the Dockerfiles and docker-compose.yml still build. Images are not
       # pushed anywhere — this is the check that keeps the local setup honest.
       - name: Validate docker-compose
