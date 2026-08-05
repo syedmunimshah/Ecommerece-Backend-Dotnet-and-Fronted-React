@@ -89,6 +89,40 @@ jobs:
           name: web
           path: FrontEnd/.next/standalone
 
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Proves the Dockerfiles and docker-compose.yml still build. Images are not
+      # pushed anywhere — this is the check that keeps the local setup honest.
+      - name: Validate docker-compose
+        run: docker compose config --quiet
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./ECommerce
+          file: ./ECommerce/Dockerfile
+          push: false
+          tags: edgecart-api:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./FrontEnd
+          file: ./FrontEnd/Dockerfile
+          push: false
+          tags: edgecart-web:ci
+          build-args: |
+            BACKEND_API_URL=${{ env.API_URL }}
+            NEXT_PUBLIC_API_URL=/bff
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy-api:
     name: Deploy API
     needs: backend

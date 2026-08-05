@@ -1,0 +1,68 @@
+# One-command local stack:  docker compose up --build
+# Storefront on http://localhost:3000, API + Swagger on http://localhost:5241/swagger
+#
+# Development values only — SA_PASSWORD and Jwt__Key are here so the stack starts with
+# no setup. Anything deployed reads its secrets from the host instead.
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Local_Dev_Pass123"
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      # The API migrates on startup, so it must not start before SQL Server accepts
+      # connections — not merely once the container is running.
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  api:
+    build:
+      context: ./ECommerce
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ECommerce: "Server=db,1433;Database=ECommerce;User Id=sa;Password=Local_Dev_Pass123;TrustServerCertificate=True;MultipleActiveResultSets=True"
+      Jwt__Key: "local-development-signing-key-not-used-anywhere-else"
+      App__PublicBaseUrl: "http://localhost:5241"
+      App__FrontendUrl: "http://localhost:3000"
+      FileUpload__RootPath: /app/data/uploads
+      Swagger__Enabled: "true"
+      Seed__DemoData: "true"
+    ports:
+      - "5241:8080"
+    volumes:
+      - api-uploads:/app/data/uploads
+
+  web:
+    build:
+      context: ./FrontEnd
+      dockerfile: Dockerfile
+      args:
+        # Browser-visible, so it points at the published port rather than the compose
+        # service name — /bff/* is proxied by Next on the server side.
+        BACKEND_API_URL: http://localhost:5241
+        NEXT_PUBLIC_API_URL: /bff
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  mssql-data:
+  api-uploads:
