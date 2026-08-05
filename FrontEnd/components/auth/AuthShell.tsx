@@ -227,5 +227,9 @@ export function AuthFooter({ children }: { children: React.ReactNode }) {
   );
 }
 
+// No opacity modifiers here: the theme colors are `var(--x)` hex values, and Tailwind 3
+// emits invalid CSS for `bg-surface/90` on those, so the rule is dropped and the input
+// falls back to the browser default white — unreadable on the dark card. Colors are set
+// explicitly so both themes stay legible.
 export const authInputClass =
-  "h-11 w-full rounded-xl border border-border bg-surface/90 px-4 text-sm outline-none transition-all focus:border-accent/50 focus:ring-2 focus:ring-accent/30";
+  "h-11 w-full rounded-xl border border-border bg-surface px-4 text-sm text-foreground placeholder:text-muted outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent";

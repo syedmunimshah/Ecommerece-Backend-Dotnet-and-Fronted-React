@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 import { DEFAULT_AVATAR, getUserAvatarUrl, getUserInitials } from "@/lib/utils/user";
 
@@ -25,7 +26,13 @@ export function UserAvatar({
   const avatarUrl = getUserAvatarUrl({ image });
   const sizeClass = SIZE_CLASS[size];
 
-  if (avatarUrl) {
+  // An avatar URL can outlive the file it points at (a redeploy that wipes the API's
+  // upload folder, a manually removed file). Falling back to initials keeps a stale
+  // reference from rendering as a broken-image icon.
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [avatarUrl]);
+
+  if (avatarUrl && !failed) {
     return (
       <Image
         src={avatarUrl}
@@ -34,6 +41,7 @@ export function UserAvatar({
         height={size === "xl" ? 96 : size === "lg" ? 56 : size === "md" ? 40 : 32}
         className={cn("rounded-full object-cover ring-2 ring-border", sizeClass, className)}
         unoptimized={avatarUrl.includes("localhost:5241")}
+        onError={() => setFailed(true)}
       />
     );
   }

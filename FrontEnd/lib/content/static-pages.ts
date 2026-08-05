@@ -32,8 +32,8 @@ export const STATIC_PAGES: Record<string, StaticPageContent> = {
     sections: [
       {
         body: [
-          "Email: support@edgecart.pk",
-          "Phone: +92 300 1234567",
+          "Email: syedmuunim@gmail.com",
+          "Phone: +92 315 8582321",
           "Hours: 24/7 customer support",
           "Office: Karachi, Pakistan",
         ],
@@ -121,7 +121,7 @@ export const STATIC_PAGES: Record<string, StaticPageContent> = {
         body: [
           "EdgeCart collects personal data to process orders and improve your experience.",
           "We never sell your data to third parties.",
-          "You may request data deletion by contacting support@edgecart.pk.",
+          "You may request data deletion by contacting syedmuunim@gmail.com.",
         ],
       },
     ],

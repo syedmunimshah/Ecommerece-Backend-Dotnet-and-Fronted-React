@@ -9,17 +9,21 @@ const config: Config = {
   darkMode: ["class", '[data-theme="dark"]'],
   theme: {
     extend: {
+      // Colors that get opacity modifiers (bg-surface/90, ring-accent/30) must be
+      // declared as rgb channels + <alpha-value>. Given a plain `var(--x)` holding a
+      // hex, Tailwind emits invalid CSS for the modifier and the browser drops the
+      // whole rule — which is how auth inputs ended up with no background at all.
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        surface: "var(--surface)",
-        muted: "var(--muted)",
-        border: "var(--border)",
-        accent: "var(--accent)",
+        background: "rgb(var(--background-rgb) / <alpha-value>)",
+        foreground: "rgb(var(--foreground-rgb) / <alpha-value>)",
+        surface: "rgb(var(--surface-rgb) / <alpha-value>)",
+        muted: "rgb(var(--muted-rgb) / <alpha-value>)",
+        border: "rgb(var(--border-rgb) / <alpha-value>)",
+        accent: "rgb(var(--accent-rgb) / <alpha-value>)",
+        seller: "rgb(var(--seller-rgb) / <alpha-value>)",
         "accent-foreground": "var(--accent-foreground)",
         "accent-hover": "var(--accent-hover)",
         "accent-soft": "var(--accent-soft)",
-        seller: "var(--seller)",
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],

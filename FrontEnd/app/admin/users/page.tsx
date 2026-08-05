@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Trash2, UserCheck } from "lucide-react";import { Breadcrumb, PageHeader } from "@/components/layout/PageShell";
+import { Loader2 } from "lucide-react";
+import { Breadcrumb, PageHeader } from "@/components/layout/PageShell";
 import {
   useGetAdminUsersQuery,
   useUpdateAdminUserMutation,
@@ -115,32 +116,21 @@ export default function AdminUsersPage() {
                     </option>
                   ))}
                 </select>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${user.isActive ? "bg-emerald-500/10 text-emerald-700" : "bg-red-500/10 text-red-600"}`}
+                {/* Deactivating is reversible — the account row is kept and IsActive is
+                    flipped — so this is a checkbox, not the trash icon it used to be. */}
+                <label
+                  className="flex items-center gap-2 text-sm text-muted"
+                  title={user.isActive ? "Uncheck to deactivate this account" : "Check to reactivate this account"}
                 >
-                  {user.isActive ? "Active" : "Inactive"}
-                </span>
-                {user.isActive ? (
-                  <button
-                    type="button"
-                    onClick={() => handleDeactivate(user.id)}
-                    className="text-muted hover:text-red-500"
-                    aria-label="Deactivate user"
-                    title="Deactivate user"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleActivate(user.id)}
-                    className="text-muted hover:text-emerald-600"
-                    aria-label="Activate user"
-                    title="Activate user"
-                  >
-                    <UserCheck className="h-4 w-4" />
-                  </button>
-                )}
+                  <input
+                    type="checkbox"
+                    checked={user.isActive}
+                    onChange={(e) =>
+                      e.target.checked ? handleActivate(user.id) : handleDeactivate(user.id)
+                    }
+                  />
+                  Active
+                </label>
               </div>
             </div>
             );

@@ -12,6 +12,18 @@
   --accent: #2563eb;
   --accent-foreground: #ffffff;
   --seller: #7c3aed;
+
+  /* RGB channels for the same colors. Tailwind needs these to build the opacity
+     modifiers (bg-surface/90, ring-accent/30); it cannot apply alpha to a hex held
+     in a var, and silently drops the rule when asked to. The hex vars above stay
+     for direct use in plain CSS. Keep both in sync. */
+  --accent-rgb: 37 99 235;
+  --surface-rgb: 248 249 251;
+  --foreground-rgb: 10 10 10;
+  --background-rgb: 255 255 255;
+  --border-rgb: 229 231 235;
+  --muted-rgb: 107 114 128;
+  --seller-rgb: 124 58 237;
   --nav-bg: #ffffff;
   --nav-text: #111827;
   --hero-wave: #ffffff;
@@ -72,6 +84,15 @@
   --accent: #3b82f6;
   --accent-foreground: #ffffff;
   --seller: #a78bfa;
+
+  /* Dark-theme channels — must mirror the hex values above. */
+  --accent-rgb: 59 130 246;
+  --surface-rgb: 17 24 39;
+  --foreground-rgb: 243 244 246;
+  --background-rgb: 11 15 25;
+  --border-rgb: 31 41 55;
+  --muted-rgb: 156 163 175;
+  --seller-rgb: 167 139 250;
   --nav-bg: #0f1419;
   --nav-text: #f9fafb;
   --hero-wave: #0b0f19;

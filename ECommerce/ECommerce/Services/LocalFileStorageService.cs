@@ -24,6 +24,17 @@ public class LocalFileStorageService : IFileStorageService
         _configuration = configuration;
     }
 
+    /// <summary>
+    /// Where uploaded files are written. Defaults to wwwroot/uploads for local dev, but
+    /// on App Service this must point outside the deployment folder (e.g. /home/data/uploads)
+    /// — publishing replaces wwwroot wholesale, taking every uploaded file with it.
+    /// Program.cs serves whatever this resolves to at /uploads.
+    /// </summary>
+    private string UploadsRoot =>
+        _configuration["FileUpload:RootPath"] is { Length: > 0 } configured
+            ? configured
+            : Path.Combine(_env.WebRootPath, "uploads");
+
     public async Task<(string Url, string FileName)> SaveProductImageAsync(
         Stream content,
         string originalFileName,
@@ -41,7 +52,7 @@ public class LocalFileStorageService : IFileStorageService
         if (!IsAllowedContentType(contentType, extension))
             throw new InvalidOperationException("Invalid image content type.");
 
-        var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "products");
+        var uploadsDir = Path.Combine(UploadsRoot, "products");
         Directory.CreateDirectory(uploadsDir);
 
         var publicBaseUrl = _configuration["App:PublicBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5241";
@@ -65,7 +76,7 @@ public class LocalFileStorageService : IFileStorageService
         if (!IsAllowedContentType(contentType, extension))
             throw new InvalidOperationException("Invalid image content type.");
 
-        var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "profiles");
+        var uploadsDir = Path.Combine(UploadsRoot, "profiles");
         Directory.CreateDirectory(uploadsDir);
 
         var publicBaseUrl = _configuration["App:PublicBaseUrl"]?.TrimEnd('/') ?? "http://localhost:5241";

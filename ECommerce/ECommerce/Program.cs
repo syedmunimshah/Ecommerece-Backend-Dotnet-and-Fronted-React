@@ -16,6 +16,7 @@ using ECommerce.Seed;
 using ECommerce.Services;
 using ECommerce.Middleware;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -142,8 +143,9 @@ app.UseForwardedHeaders();
 // Catch-all → ProblemDetails. Must be early so it wraps the rest of the pipeline.
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Configure the HTTP request pipeline. Swagger is on in Development; elsewhere it is
+// opt-in (Swagger:Enabled) so the hosted demo can expose its API docs.
+if (app.Configuration.GetValue("Swagger:Enabled", app.Environment.IsDevelopment()))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -159,6 +161,20 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
+
+// Uploads live outside wwwroot when FileUpload:RootPath is set, so that publishing —
+// which replaces the deployment folder — cannot delete user-uploaded images. Serve that
+// directory at the same /uploads URL the stored image links already use.
+var uploadsRoot = app.Configuration["FileUpload:RootPath"];
+if (!string.IsNullOrWhiteSpace(uploadsRoot))
+{
+    Directory.CreateDirectory(uploadsRoot);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadsRoot),
+        RequestPath = "/uploads"
+    });
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -177,8 +193,9 @@ try
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
     await RoleEnsurer.EnsureAsync(db);
-    // Demo/dummy data only outside Production.
-    if (!app.Environment.IsProduction())
+    // Demo/dummy data: on by default outside Production, opt-in elsewhere (Seed:DemoData)
+    // so the hosted demo can be populated without running as Development.
+    if (app.Configuration.GetValue("Seed:DemoData", !app.Environment.IsProduction()))
     {
         await DummyDataSeeder.SeedAsync(db);
     }
