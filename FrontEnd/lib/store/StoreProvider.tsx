@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { Provider } from "react-redux";
 import { makeStore, type AppStore } from "./store";
 import { hydrateAuth } from "@/features/auth/authSlice";
@@ -25,13 +25,13 @@ function AuthHydrator({ children }: { children: React.ReactNode }) {
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const storeRef = useRef<AppStore | null>(null);
-  if (!storeRef.current) {
-    storeRef.current = makeStore();
-  }
+  // One store per mount — a lazy useState initialiser runs exactly once, which is what
+  // the App Router needs (a request must never reuse another request's store). A ref
+  // does the same job but has to be read during render, which React now warns about.
+  const [store] = useState<AppStore>(makeStore);
 
   return (
-    <Provider store={storeRef.current}>
+    <Provider store={store}>
       <AuthHydrator>{children}</AuthHydrator>
     </Provider>
   );

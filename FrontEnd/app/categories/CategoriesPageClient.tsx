@@ -5,7 +5,7 @@ import { Smartphone, Laptop, Headphones, Gamepad2, Shirt, Package } from "lucide
 import { useCategoryList } from "@/lib/hooks/useCategoryList";
 import { slugifyCategory } from "@/lib/utils/product";
 import { Breadcrumb, PageHeader } from "@/components/layout/PageShell";
-import { AnimateIn, StaggerContainer, StaggerItem } from "@/components/ui/AnimateIn";
+import { StaggerContainer, StaggerItem } from "@/components/ui/AnimateIn";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 const ICON_MAP: Record<string, { icon: typeof Package; iconColor: string; iconBg: string }> = {

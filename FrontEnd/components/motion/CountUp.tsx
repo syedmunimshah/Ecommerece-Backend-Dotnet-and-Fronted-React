@@ -8,13 +8,11 @@ export function CountUp({
   suffix = "",
   prefix = "",
   className,
-  duration = 1.8,
 }: {
   value: number;
   suffix?: string;
   prefix?: string;
   className?: string;
-  duration?: number;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.5 });

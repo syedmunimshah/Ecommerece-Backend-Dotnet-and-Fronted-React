@@ -1,0 +1,139 @@
+name: CI / CD
+
+# Build and test every push and pull request. Deploying only happens for pushes to
+# main, and only once the publish-profile secrets exist — so a fork or a fresh clone
+# still gets working CI without any configuration.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  NODE_VERSION: "22.x"
+  API_URL: https://edgecart-api.azurewebsites.net
+
+jobs:
+  backend:
+    name: Backend — build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore ECommerce/ECommerce.sln
+
+      - name: Build
+        run: dotnet build ECommerce/ECommerce.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test ECommerce/ECommerce.sln -c Release --no-build --verbosity normal
+
+      - name: Publish
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: dotnet publish ECommerce/ECommerce/ECommerce.csproj -c Release -o publish --no-build
+
+      - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        with:
+          name: api
+          path: publish
+
+  frontend:
+    name: Frontend — lint, typecheck & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: FrontEnd
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: FrontEnd/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # rewrites() and NEXT_PUBLIC_* are resolved at build time, so the API URL has to
+      # be present here — setting it only at runtime would bake in localhost.
+      - name: Build
+        run: npm run build
+        env:
+          BACKEND_API_URL: ${{ env.API_URL }}
+          NEXT_PUBLIC_API_URL: /bff
+
+      - name: Assemble standalone bundle
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          if [ -d public ]; then cp -r public .next/standalone/public; fi
+
+      - uses: actions/upload-artifact@v4
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        with:
+          name: web
+          path: FrontEnd/.next/standalone
+
+  deploy-api:
+    name: Deploy API
+    needs: backend
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # A secret cannot be tested directly in an `if:` — copy it to env and check that.
+    env:
+      PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_API }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: api
+          path: publish
+
+      - name: Skip if not configured
+        if: env.PUBLISH_PROFILE == ''
+        run: echo "AZURE_WEBAPP_PUBLISH_PROFILE_API is not set — skipping deploy." >> $GITHUB_STEP_SUMMARY
+
+      - uses: azure/webapps-deploy@v3
+        if: env.PUBLISH_PROFILE != ''
+        with:
+          app-name: edgecart-api
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_API }}
+          package: publish
+
+  deploy-web:
+    name: Deploy frontend
+    needs: frontend
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      PUBLISH_PROFILE: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_WEB }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: web
+          path: web
+
+      - name: Skip if not configured
+        if: env.PUBLISH_PROFILE == ''
+        run: echo "AZURE_WEBAPP_PUBLISH_PROFILE_WEB is not set — skipping deploy." >> $GITHUB_STEP_SUMMARY
+
+      - uses: azure/webapps-deploy@v3
+        if: env.PUBLISH_PROFILE != ''
+        with:
+          app-name: edgecart-web
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_WEB }}
+          package: web
