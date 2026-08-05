@@ -8,8 +8,30 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
 ![SQL Server](https://img.shields.io/badge/SQL_Server-EF_Core-CC2927?logo=microsoftsqlserver&logoColor=white)
 ![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF?logo=stripe&logoColor=white)
+![Azure](https://img.shields.io/badge/Hosted_on-Azure-0078D4?logo=microsoftazure&logoColor=white)
 
-> 🚧 Live demo link and screenshots are on the way — see [Roadmap](#roadmap). In the meantime, the [Getting Started](#getting-started) section gets you running locally in a few minutes.
+---
+
+## Live Demo
+
+| | |
+|---|---|
+| 🛍️ **Storefront** | **https://edgecart-web.azurewebsites.net** |
+| ⚙️ **API + Swagger** | **https://edgecart-api.azurewebsites.net/swagger** |
+
+**Sign in as any role** — password `Password123` for all three:
+
+| Role | Email | Try |
+|---|---|---|
+| Customer | `customer@edgecart.pk` | Browse → cart → Stripe checkout |
+| Seller | `seller@edgecart.pk` | List a product, view your orders |
+| Admin | `admin@edgecart.pk` | Approve sellers, manage categories and users |
+
+> **First request may take ~30 seconds.** The database runs on Azure SQL's serverless
+> tier, which pauses when idle and needs a moment to resume. It's quick after that.
+
+Payments run in **Stripe test mode** — use card `4242 4242 4242 4242`, any future
+expiry and any CVC. No real charge is made.
 
 ---
 
@@ -93,6 +115,36 @@ FrontEnd/
 
 ---
 
+## Deployment
+
+Both halves run on **Azure App Service (Linux)**, sharing one plan, with **Azure SQL
+Database** on the serverless tier behind them.
+
+```
+edgecart-web  (Next.js, standalone build)  ──/bff/*──►  edgecart-api  (ASP.NET Core 8)
+                                                              │
+                                                              ▼
+                                                   Azure SQL  (serverless)
+```
+
+A few decisions worth calling out:
+
+- **No secrets in the repo.** Connection strings, the JWT signing key, SMTP and Stripe
+  credentials live in App Service configuration. .NET reads environment variables last,
+  so they override `appsettings.json` at runtime without the file ever holding a secret.
+  Locally the same values come from `dotnet user-secrets`.
+- **Uploads survive deploys.** They're written to `/home/data/uploads` rather than under
+  `wwwroot`, because publishing replaces the deployment folder wholesale — anything
+  stored inside it is deleted on the next deploy. `FileUpload:RootPath` controls this,
+  and Program.cs serves that directory at `/uploads`.
+- **Migrations run at startup**, after the host starts listening, so a slow database
+  never delays the port binding.
+- **The frontend is deployed as a Next.js standalone build** — a self-contained server
+  with only the dependencies it actually uses, which keeps the upload at ~5 MB instead
+  of shipping all of `node_modules`.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -147,10 +199,14 @@ The backend seeds these on first run so you can try every role immediately:
 
 ## Roadmap
 
-- [ ] Deploy to Azure (App Service + Azure SQL + Blob Storage)
+- [x] Deploy to Azure (App Service + Azure SQL)
+- [x] Live demo link
+- [ ] Move uploads to Azure Blob Storage (they currently sit on App Service storage,
+      which is durable but tied to a single app)
 - [ ] xUnit + Moq test suite for the service layer
 - [ ] Dockerfile + docker-compose for one-command local setup
-- [ ] Live demo link + screenshots
+- [ ] GitHub Actions pipeline (deploys are currently run by hand)
+- [ ] Screenshots in this README
 
 ---
 
