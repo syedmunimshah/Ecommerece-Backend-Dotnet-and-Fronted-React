@@ -121,8 +121,10 @@ if (builder.Configuration.GetValue<bool>("Smtp:Enabled") &&
     builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 else
     builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
-// AI shopping assistant. The client is a singleton (it owns an HttpClient); without a key
-// the app still boots and every other feature keeps working — the chat endpoint returns 503.
+// Shopping assistant. The keyword-driven implementation is the default: it answers from
+// EdgeCart's own tables, so it needs no API key, costs nothing per message, and works
+// offline. Configuring Claude:ApiKey upgrades the same endpoint to the model-backed one,
+// which understands free-form questions. The client is a singleton (it owns an HttpClient).
 var claudeApiKey = builder.Configuration["Claude:ApiKey"];
 if (!string.IsNullOrWhiteSpace(claudeApiKey))
 {
@@ -131,7 +133,7 @@ if (!string.IsNullOrWhiteSpace(claudeApiKey))
 }
 else
 {
-    builder.Services.AddScoped<IChatService, UnavailableChatService>();
+    builder.Services.AddScoped<IChatService, RuleBasedChatService>();
 }
 // Uploads go to Blob Storage when a connection string is configured, otherwise to local
 // disk. Blob is what production wants: files survive redeploys and every instance sees

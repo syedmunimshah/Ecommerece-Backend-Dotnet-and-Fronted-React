@@ -1,21 +1,37 @@
-# EdgeCart AI Shopping Assistant
+# EdgeCart Shopping Assistant
 
 A chat widget that answers real questions about the catalog, your cart, and your orders —
-because it can read them. It is not a chatbot bolted onto a FAQ: the model calls the same
-EdgeCart services the website itself calls, so what it tells you is what the database says.
+because it can read them. It is not a chatbot bolted onto a FAQ: it calls the same EdgeCart
+services the website itself calls, so what it tells you is what the database says.
 
 ```
-You: "did my headphones order ship yet?"
-  → the model asks for the get_order_status tool
-  → the API runs OrderService + OrderTracking for YOUR user id
-  → "Order #14 shipped on 3 August. Two items, PKR 8,400 total."
+You: "where is order 14?"
+  → the assistant looks up the order
+  → OrderService + OrderTracking run for YOUR user id
+  → "Order #14 is Shipped. Placed 3 Aug 2026, total PKR 8,400, 2 items."
 ```
+
+**There are two implementations behind one interface**, and the endpoint, the DTOs and the
+whole front end are identical either way:
+
+| | `RuleBasedChatService` (default) | `ChatService` (opt-in) |
+|---|---|---|
+| Understands | A fixed set of intents, matched on keywords | Free-form questions and follow-ups |
+| Needs | Nothing | An Anthropic API key |
+| Costs | Nothing | Per message, from prepaid API credit |
+| Works offline | Yes | No |
+| Writes | Never — read-only by design | Can add to the cart, after confirming |
+
+`Program.cs` picks one at startup: the model-backed service when `Claude:ApiKey` is set, the
+keyword one otherwise. The rule-based default is deliberately **read-only** — a keyword match
+is a guess, and a wrong guess that shows the wrong list costs nothing, while a wrong guess
+that writes to someone's cart does.
 
 ---
 
 ## Try it
 
-1. Set an API key and start the app — see [Turning it on](#turning-it-on)
+1. Start the app — no API key needed for the default assistant
 2. Open the storefront and sign in as the demo customer — `customer@edgecart.pk` / `Password123`
 3. Click the blue **bubble in the bottom-right corner**. This is the assistant; the search
    box in the header is ordinary product search and does not talk to it
@@ -26,29 +42,39 @@ You: "did my headphones order ship yet?"
 
 ### Things worth asking
 
+Works with **no API key**, on the default keyword assistant:
+
 | Ask this | What it does behind the scenes |
 |---|---|
-| *"What phones do you have under 50,000?"* | Searches the catalog, then filters and formats the results |
-| *"Tell me more about the second one"* | Pulls that product's full details — price, stock, seller |
+| *"Do you have wireless headphones?"* | Searches the catalog and formats the top matches with price and stock |
 | *"What's in my cart?"* | Reads your cart |
-| *"Add two of those to my cart"* | Confirms with you first, then actually adds them — refresh the cart page and they're there |
-| *"Show me my orders"* | Lists your recent orders with status and total |
-| *"Where is order 14?"* | Order status **plus** its tracking history |
-| *"Is anything I ordered still pending?"* | Combines several lookups into one answer |
+| *"Show me my orders"* | Lists your recent orders with status, total and date |
+| *"Where is order 14?"* | Order status **plus** its latest tracking update |
+| *"Help"* | The list of intents it recognises |
 
-Try to break it, too. Ask for **order 9999** (not yours) and it will tell you it can't find
-it on your account — not because the model was told to be polite, but because the lookup
+Needs an **API key**, because they depend on free-form understanding:
+
+| Ask this | Why the keyword version cannot do it |
+|---|---|
+| *"What phones do you have under 50,000?"* | Needs to parse a price filter out of the sentence |
+| *"Tell me more about the second one"* | Needs to remember what "the second one" referred to |
+| *"Add two of those to my cart"* | Needs to resolve "those", and to confirm before writing |
+| *"Is anything I ordered still pending?"* | Needs to combine several lookups into one answer |
+
+Try to break either one. Ask for **order 9999** (not yours) and it will tell you it can't
+find it on your account — not because anything was told to be polite, but because the lookup
 itself is scoped to you. See [Security](#security) below.
 
 ---
 
-## Turning it on
+## Upgrading to the model-backed assistant
 
-The assistant needs an Anthropic API key. **Without one, everything else in EdgeCart works
-normally** — the app boots, the widget calls the API, and the endpoint answers
-`503 Service Unavailable` with a plain message.
+The keyword assistant is the default and needs no configuration. Setting an Anthropic API key
+swaps in `ChatService`, which understands free-form questions — at a per-message cost, billed
+against prepaid credit rather than a subscription.
 
-Get a key at [console.anthropic.com](https://console.anthropic.com).
+Get a key at [console.anthropic.com](https://console.anthropic.com). Because the widget is
+reachable by any signed-in customer, set a spend limit and leave auto-reload off.
 
 **Local development**
 
@@ -117,8 +143,8 @@ on every mutation — the assistant did not need its own copy of that rule, and 
 
 | File | What it holds |
 |---|---|
+| `Service/Implementations/RuleBasedChatService.cs` | Intent matching and formatting — the default |
 | `Service/Implementations/ChatService.cs` | Tool definitions, the model loop, tool execution |
-| `Service/Implementations/UnavailableChatService.cs` | The no-API-key fallback |
 | `Service/Interfaces/IChatService.cs`, `Service/DTO/ChatDto.cs` | Interface and DTOs |
 | `ECommerce/Controllers/ChatController.cs` | `POST /api/chat/message` |
 | `FrontEnd/components/chat/ChatWidget.tsx` | The widget |

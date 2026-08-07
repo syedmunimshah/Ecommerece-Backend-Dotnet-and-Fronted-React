@@ -23,7 +23,7 @@
 
 | Role | Email | Try |
 |---|---|---|
-| Customer | `customer@edgecart.pk` | Browse → cart → Stripe checkout, or ask the [AI assistant](docs/ai-assistant.md) in the corner |
+| Customer | `customer@edgecart.pk` | Browse → cart → Stripe checkout, or ask the [shopping assistant](docs/ai-assistant.md) in the corner |
 | Seller | `seller@edgecart.pk` | List a product, view your orders |
 | Admin | `admin@edgecart.pk` | Approve sellers, manage categories and users |
 
@@ -55,7 +55,8 @@ It's built as a portfolio project — every feature below is implemented and wor
 - **Cart & checkout** — server-side stock validation on every cart mutation, so you can never add or order more than what's in stock
 - **Orders** — stock decrement and order creation wrapped in a single database transaction (no orphaned orders or double-decremented stock on failure)
 - **Payments (Stripe)** — hosted Stripe Checkout session created server-side; the charge amount is always the server's order total, never a value the client can influence. Confirmed via both a signed Stripe **webhook** and a **confirm-on-return** check on the success page, plus a Cash-on-Delivery fallback
-- **AI shopping assistant (Claude)** — a chat widget that answers real questions about the catalog, the customer's cart and their orders. It works through **tool use**: the model never touches the database, it requests a tool and the API runs the matching EdgeCart service. Every tool is scoped to the caller's `userId` taken from the **JWT**, never from the conversation, so no prompt can reach another customer's data — [full walkthrough](docs/ai-assistant.md)
+- **Shopping assistant** — a chat widget that answers real questions about the catalog, the customer's cart and their orders, with **two implementations behind one `IChatService` interface** and no change to the controller or the front end either way. The default is keyword-driven: it classifies the message, runs the matching EdgeCart service and formats the result — no API key, no per-message cost, works offline, and deliberately **read-only**, because a keyword match is a guess and a wrong guess must not write to someone's cart. Setting `Claude:ApiKey` swaps in the Claude-backed one, which handles free-form questions through **tool use**: the model never touches the database, it requests a tool and the API runs the service. Both scope every lookup to the caller's `userId` taken from the **JWT**, never from the conversation, so no prompt can reach another customer's data — [full walkthrough](docs/ai-assistant.md)
+- **Uploads on Azure Blob Storage** — product and profile images go to Blob when `Storage:ConnectionString` is set and to local disk otherwise. Disk tied every image to one machine: publishing replaces the deployment folder and a second instance would not see what the first wrote
 - **Reviews** — one review per user per product
 - **Seller onboarding** — apply → admin approval workflow before a seller can list products
 - **Admin panel** — user management (soft-delete/reactivate, never a hard delete), role management, category management, order oversight
@@ -169,7 +170,7 @@ dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:ECommerce" "Server=YOUR_SERVER;Database=ECommerce;Trusted_Connection=True;TrustServerCertificate=True"
 dotnet user-secrets set "Jwt:Key" "a-long-random-secret-at-least-32-characters"
 dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."   # optional — get a free key at dashboard.stripe.com
-dotnet user-secrets set "Claude:ApiKey" "sk-ant-..."       # optional — enables the AI assistant
+dotnet user-secrets set "Claude:ApiKey" "sk-ant-..."       # optional — upgrades the assistant to the model-backed one
 dotnet run
 ```
 
@@ -205,11 +206,11 @@ The backend seeds these on first run so you can try every role immediately:
 
 - [x] Deploy to Azure (App Service + Azure SQL)
 - [x] Live demo link
-- [ ] Move uploads to Azure Blob Storage (they currently sit on App Service storage,
-      which is durable but tied to a single app)
-- [ ] xUnit + Moq test suite for the service layer
-- [ ] Dockerfile + docker-compose for one-command local setup
-- [ ] GitHub Actions pipeline (deploys are currently run by hand)
+- [x] Move uploads to Azure Blob Storage
+- [x] xUnit + Moq test suite for the service layer
+- [x] Dockerfile + docker-compose for one-command local setup
+- [x] GitHub Actions pipeline
+- [x] Shopping assistant that runs without an API key
 - [ ] Screenshots in this README
 
 ---

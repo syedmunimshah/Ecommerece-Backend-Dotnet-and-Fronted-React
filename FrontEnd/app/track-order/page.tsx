@@ -6,12 +6,19 @@ import { Breadcrumb, PageHeader } from "@/components/layout/PageShell";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuth } from "@/features/auth/useAuth";
+import { useMounted } from "@/lib/hooks/useMounted";
 import { useGetOrderByIdQuery, useGetOrderTrackingQuery } from "@/lib/store/api/api";
 import { getOrderStatusClass } from "@/lib/orderStatus";
 import { cn } from "@/lib/cn";
 
 export default function TrackOrderPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated: authFromStore } = useAuth();
+  // The token lives in localStorage, so the server always renders as signed out while
+  // the browser renders as signed in — React reports that as a hydration mismatch and
+  // throws the tree away. Treating everyone as signed out until mounted makes the first
+  // client render match the server's, and the real state takes over immediately after.
+  const mounted = useMounted();
+  const isAuthenticated = mounted && authFromStore;
   const [input, setInput] = useState("");
   const [orderId, setOrderId] = useState<number | null>(null);
 

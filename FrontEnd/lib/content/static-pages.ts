@@ -41,14 +41,14 @@ export const STATIC_PAGES: Record<string, StaticPageContent> = {
     ],
   },
   "ai-assistant": {
-    title: "AI Shopping Assistant",
+    title: "Shopping Assistant",
     subtitle: "The chat bubble in the bottom-right corner",
     sections: [
       {
         heading: "What it is",
         body: [
-          "A shopping assistant that can actually read your data — not a scripted FAQ bot. It searches the live catalogue, opens your cart, and looks up your orders, so what it tells you is what our database says right now.",
-          "Sign in first. The bubble only appears for signed-in customers, because it answers questions about your cart and your orders.",
+          "A shopping assistant that reads your actual data. It searches the live catalogue, opens your cart, and looks up your orders, so what it tells you is what our database says right now.",
+          "It answers a fixed set of questions rather than free-form conversation, so keep it short and direct — one thing per message. Sign in first: the bubble only appears for signed-in customers, because it answers questions about your cart and your orders.",
         ],
       },
       {
@@ -61,18 +61,17 @@ export const STATIC_PAGES: Record<string, StaticPageContent> = {
       {
         heading: "What to ask it",
         body: [
-          "\"What phones do you have under 50,000?\" — searches the catalogue and shows you what fits.",
-          "\"Tell me more about the second one\" — pulls that product's price, stock and seller.",
-          "\"What's in my cart?\" — reads your cart back to you.",
-          "\"Add two of those to my cart\" — confirms with you, then actually adds them.",
-          "\"Show me my orders\" — your recent orders with status and total.",
-          "\"Where is order 14?\" — that order's status plus its full tracking history.",
+          "\"Do you have wireless headphones?\" — searches the catalogue and shows the closest matches with prices and stock.",
+          "\"What's in my cart?\" — reads your cart back to you with the running total.",
+          "\"Show me my orders\" — your recent orders with status, total and date.",
+          "\"Where is order 14?\" — that order's status plus its latest tracking update.",
+          "\"Help\" — the full list of what it understands.",
         ],
       },
       {
         heading: "What it will not do",
         body: [
-          "It cannot place an order, take a payment, or cancel anything — those stay in your hands.",
+          "It only reads. Adding to the cart, placing an order, taking a payment and cancelling all stay on the real pages, where you confirm them yourself.",
           "It cannot see another customer's cart or orders. Every lookup runs as you, based on your sign-in, so no amount of asking will change whose data it reads.",
           "It has no refund or complaint powers. For those it will point you to Contact Us rather than invent a policy.",
         ],
@@ -81,7 +80,7 @@ export const STATIC_PAGES: Record<string, StaticPageContent> = {
         heading: "If it is not working",
         body: [
           "No bubble in the corner? You are signed out — sign in and it appears.",
-          "Says the assistant is unavailable? The service is switched off on this server, or is briefly busy. Nothing else on EdgeCart is affected.",
+          "Getting an unexpected answer? It matches on keywords, so a long sentence can be read as a product search. Try \"my orders\", \"my cart\", or \"order 14\".",
         ],
       },
     ],
