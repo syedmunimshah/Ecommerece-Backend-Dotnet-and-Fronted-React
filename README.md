@@ -136,15 +136,31 @@ A few decisions worth calling out:
   credentials live in App Service configuration. .NET reads environment variables last,
   so they override `appsettings.json` at runtime without the file ever holding a secret.
   Locally the same values come from `dotnet user-secrets`.
-- **Uploads survive deploys.** They're written to `/home/data/uploads` rather than under
-  `wwwroot`, because publishing replaces the deployment folder wholesale — anything
-  stored inside it is deleted on the next deploy. `FileUpload:RootPath` controls this,
-  and Program.cs serves that directory at `/uploads`.
+- **Uploads survive deploys.** They go to **Azure Blob Storage** (`Storage:ConnectionString`),
+  so a redeploy, a restart or a second instance leaves them alone. Publishing replaces the
+  deployment folder wholesale, so anything under `wwwroot` would be deleted on the next
+  deploy. Without a blob connection string the app falls back to disk at
+  `FileUpload:RootPath`, which Program.cs serves at `/uploads`.
 - **Migrations run at startup**, after the host starts listening, so a slow database
   never delays the port binding.
 - **The frontend is deployed as a Next.js standalone build** — a self-contained server
   with only the dependencies it actually uses, which keeps the upload at ~5 MB instead
   of shipping all of `node_modules`.
+
+`NEXT_PUBLIC_*` values are baked into the client bundle at build time, so the frontend has
+to be built with the settings it will run under:
+
+```powershell
+$env:BACKEND_API_URL  = "https://edgecart-api.azurewebsites.net"
+$env:NEXT_PUBLIC_API_URL = "/bff"
+npm run build
+```
+
+> Build this from **PowerShell or CMD, not Git Bash**. Git Bash rewrites arguments that look
+> like Unix absolute paths, so `NEXT_PUBLIC_API_URL=/bff` is baked in as
+> `C:/Program Files/Git/bff` and every API call from the browser resolves to a `file://` URL
+> that cannot load. Verify with `grep -r "Program Files" .next/static/chunks/` — it should
+> print nothing.
 
 ---
 
