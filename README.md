@@ -23,7 +23,7 @@
 
 | Role | Email | Try |
 |---|---|---|
-| Customer | `customer@edgecart.pk` | Browse → cart → Stripe checkout |
+| Customer | `customer@edgecart.pk` | Browse → cart → Stripe checkout, or ask the [AI assistant](docs/ai-assistant.md) in the corner |
 | Seller | `seller@edgecart.pk` | List a product, view your orders |
 | Admin | `admin@edgecart.pk` | Approve sellers, manage categories and users |
 
@@ -55,6 +55,7 @@ It's built as a portfolio project — every feature below is implemented and wor
 - **Cart & checkout** — server-side stock validation on every cart mutation, so you can never add or order more than what's in stock
 - **Orders** — stock decrement and order creation wrapped in a single database transaction (no orphaned orders or double-decremented stock on failure)
 - **Payments (Stripe)** — hosted Stripe Checkout session created server-side; the charge amount is always the server's order total, never a value the client can influence. Confirmed via both a signed Stripe **webhook** and a **confirm-on-return** check on the success page, plus a Cash-on-Delivery fallback
+- **AI shopping assistant (Claude)** — a chat widget that answers real questions about the catalog, the customer's cart and their orders. It works through **tool use**: the model never touches the database, it requests a tool and the API runs the matching EdgeCart service. Every tool is scoped to the caller's `userId` taken from the **JWT**, never from the conversation, so no prompt can reach another customer's data — [full walkthrough](docs/ai-assistant.md)
 - **Reviews** — one review per user per product
 - **Seller onboarding** — apply → admin approval workflow before a seller can list products
 - **Admin panel** — user management (soft-delete/reactivate, never a hard delete), role management, category management, order oversight
@@ -73,6 +74,7 @@ It's built as a portfolio project — every feature below is implemented and wor
 | Auth | JWT Bearer, BCrypt.Net |
 | Mapping | AutoMapper |
 | Payments | Stripe.net |
+| AI | Anthropic Claude API (tool use) |
 | Logging | Serilog (console + file sinks) |
 | API docs | Swashbuckle / Swagger |
 
@@ -167,12 +169,14 @@ dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:ECommerce" "Server=YOUR_SERVER;Database=ECommerce;Trusted_Connection=True;TrustServerCertificate=True"
 dotnet user-secrets set "Jwt:Key" "a-long-random-secret-at-least-32-characters"
 dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."   # optional — get a free key at dashboard.stripe.com
+dotnet user-secrets set "Claude:ApiKey" "sk-ant-..."       # optional — enables the AI assistant
 dotnet run
 ```
 
 The API applies EF Core migrations and seeds demo data automatically on first run. It's available at `http://localhost:5241`, with interactive API docs at `http://localhost:5241/swagger`.
 
 > Don't have a Stripe key handy? Leave it unset — checkout still works via **Cash on Delivery**.
+> Same for the Claude key: leave it unset and everything runs, the chat endpoint just returns 503.
 
 ### 3. Frontend setup
 

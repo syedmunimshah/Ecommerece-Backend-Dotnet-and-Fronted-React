@@ -44,6 +44,9 @@ services:
       FileUpload__RootPath: /app/data/uploads
       Swagger__Enabled: "true"
       Seed__DemoData: "true"
+      # Optional — export CLAUDE_API_KEY to enable the AI assistant. Unset, the rest of
+      # the stack runs normally and the chat endpoint answers 503.
+      Claude__ApiKey: "${CLAUDE_API_KEY:-}"
     ports:
       - "5241:8080"
     volumes:

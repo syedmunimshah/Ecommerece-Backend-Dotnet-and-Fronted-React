@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { PageTransition } from "@/components/motion/PageTransition";
+import { ChatWidget } from "@/components/chat/ChatWidget";
 
 const AUTH_PATHS = new Set(["/login", "/register", "/forgot-password", "/reset-password"]);
 
@@ -30,6 +31,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
       </main>
       <Footer />
       <BottomNav />
+      <ChatWidget />
     </>
   );
 }

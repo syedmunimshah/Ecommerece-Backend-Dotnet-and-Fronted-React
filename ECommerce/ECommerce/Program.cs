@@ -17,7 +17,9 @@ using ECommerce.Services;
 using ECommerce.Middleware;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
+using Azure.Storage.Blobs;
 using Serilog;
+using Anthropic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -119,7 +121,33 @@ if (builder.Configuration.GetValue<bool>("Smtp:Enabled") &&
     builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 else
     builder.Services.AddScoped<IEmailService, ConsoleEmailService>();
-builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+// AI shopping assistant. The client is a singleton (it owns an HttpClient); without a key
+// the app still boots and every other feature keeps working — the chat endpoint returns 503.
+var claudeApiKey = builder.Configuration["Claude:ApiKey"];
+if (!string.IsNullOrWhiteSpace(claudeApiKey))
+{
+    builder.Services.AddSingleton(new AnthropicClient { ApiKey = claudeApiKey });
+    builder.Services.AddScoped<IChatService, ChatService>();
+}
+else
+{
+    builder.Services.AddScoped<IChatService, UnavailableChatService>();
+}
+// Uploads go to Blob Storage when a connection string is configured, otherwise to local
+// disk. Blob is what production wants: files survive redeploys and every instance sees
+// the same set, whereas disk ties them to one machine. The container client is a
+// singleton — it is thread-safe and holds a pooled connection.
+var blobConnection = builder.Configuration["Storage:ConnectionString"];
+if (!string.IsNullOrWhiteSpace(blobConnection))
+{
+    var containerName = builder.Configuration["Storage:Container"] ?? "uploads";
+    builder.Services.AddSingleton(new BlobContainerClient(blobConnection, containerName));
+    builder.Services.AddScoped<IFileStorageService, BlobFileStorageService>();
+}
+else
+{
+    builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+}
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICartService, CartService>();

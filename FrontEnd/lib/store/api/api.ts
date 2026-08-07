@@ -34,6 +34,8 @@ import type {
   CreateRoleDto,
   UpdateRoleDto,
   PagedRequest,
+  ChatRequestDto,
+  ChatResponseDto,
 } from "@/lib/types/api";
 import { unwrapPagedData } from "@/lib/utils/paged";
 import { normalizeUserDto } from "@/lib/utils/user";
@@ -301,6 +303,17 @@ export const api = baseApi.injectEndpoints({
       query: (sessionId) => `/api/payments/confirm?sessionId=${encodeURIComponent(sessionId)}`,
     }),
 
+    // ─── AI assistant ───
+    // The assistant can add to the cart, so a reply invalidates the cart cache.
+    sendChatMessage: builder.mutation<ChatResponseDto, ChatRequestDto>({
+      query: (body) => ({
+        url: "/api/chat/message",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Cart"],
+    }),
+
     // ─── Reviews ───
     getProductReviews: builder.query<PagedResponse<ReviewDto>, { productId: number } & PagedRequest>({
       query: ({ productId, pageNumber = 1, pageSize = 10 }) => ({
@@ -484,6 +497,7 @@ export const {
   useCreatePaymentMutation,
   useGetPaymentByOrderQuery,
   useConfirmPaymentQuery,
+  useSendChatMessageMutation,
   useGetProductReviewsQuery,
   useCreateReviewMutation,
   useDeleteReviewMutation,

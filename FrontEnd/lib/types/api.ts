@@ -246,3 +246,23 @@ export interface UpdateRoleDto {
   name: string;
   isActive: boolean;
 }
+
+export interface ChatMessageDto {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface ChatRequestDto {
+  message: string;
+  history: ChatMessageDto[];
+}
+
+export interface ChatToolCallDto {
+  name: string;
+  input: string;
+}
+
+export interface ChatResponseDto {
+  reply: string;
+  toolCalls: ChatToolCallDto[];
+}

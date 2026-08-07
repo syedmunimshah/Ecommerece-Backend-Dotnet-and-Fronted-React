@@ -13,6 +13,7 @@ export const FOOTER_LINKS = {
   ],
   support: [
     { label: "Help Center", href: "/help" },
+    { label: "AI Assistant", href: "/ai-assistant" },
     { label: "Track Order", href: "/track-order" },
     { label: "Returns", href: "/returns" },
     { label: "Contact Us", href: "/contact" },

@@ -30,10 +30,17 @@ const nextConfig: NextConfig = {
         hostname: "fdn.gsmarena.com",
         pathname: "/**",
       },
+      // Uploads served straight from Azure Blob Storage. Wildcarded so the storage
+      // account can be renamed or swapped without touching this file.
+      {
+        protocol: "https",
+        hostname: "**.blob.core.windows.net",
+        pathname: "/**",
+      },
       // Product photos referenced by URL from retailer sites. Every new host has to be
       // listed here or next/image answers 400 and the picture silently never appears —
       // adding a product image is therefore a code change plus a redeploy. Uploading
-      // through the app instead (stored on the API) avoids that entirely.
+      // through the app instead avoids that entirely.
       { protocol: "https", hostname: "iphone.biz.pk", pathname: "/**" },
       { protocol: "https", hostname: "bsimg.nl", pathname: "/**" },
       { protocol: "https", hostname: "pakistanstore.pk", pathname: "/**" },

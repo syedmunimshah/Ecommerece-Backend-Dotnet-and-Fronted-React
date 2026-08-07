@@ -40,18 +40,54 @@ export const STATIC_PAGES: Record<string, StaticPageContent> = {
       },
     ],
   },
-  "track-order": {
-    title: "Track Order",
-    subtitle: "Enter your order ID to see status",
+  "ai-assistant": {
+    title: "AI Shopping Assistant",
+    subtitle: "The chat bubble in the bottom-right corner",
     sections: [
       {
+        heading: "What it is",
         body: [
-          "Use the form on this page to track your shipment in real time.",
-          "Order IDs are sent to your email after checkout.",
+          "A shopping assistant that can actually read your data — not a scripted FAQ bot. It searches the live catalogue, opens your cart, and looks up your orders, so what it tells you is what our database says right now.",
+          "Sign in first. The bubble only appears for signed-in customers, because it answers questions about your cart and your orders.",
+        ],
+      },
+      {
+        heading: "How to open it",
+        body: [
+          "Look for the round blue bubble in the bottom-right corner of any page, and click it.",
+          "The search box at the top of the page is ordinary product search — it does not talk to the assistant.",
+        ],
+      },
+      {
+        heading: "What to ask it",
+        body: [
+          "\"What phones do you have under 50,000?\" — searches the catalogue and shows you what fits.",
+          "\"Tell me more about the second one\" — pulls that product's price, stock and seller.",
+          "\"What's in my cart?\" — reads your cart back to you.",
+          "\"Add two of those to my cart\" — confirms with you, then actually adds them.",
+          "\"Show me my orders\" — your recent orders with status and total.",
+          "\"Where is order 14?\" — that order's status plus its full tracking history.",
+        ],
+      },
+      {
+        heading: "What it will not do",
+        body: [
+          "It cannot place an order, take a payment, or cancel anything — those stay in your hands.",
+          "It cannot see another customer's cart or orders. Every lookup runs as you, based on your sign-in, so no amount of asking will change whose data it reads.",
+          "It has no refund or complaint powers. For those it will point you to Contact Us rather than invent a policy.",
+        ],
+      },
+      {
+        heading: "If it is not working",
+        body: [
+          "No bubble in the corner? You are signed out — sign in and it appears.",
+          "Says the assistant is unavailable? The service is switched off on this server, or is briefly busy. Nothing else on EdgeCart is affected.",
         ],
       },
     ],
   },
+  // "track-order" is not here on purpose — it is a real page with a real form,
+  // at app/track-order/page.tsx, wired to the order-tracking API.
   returns: {
     title: "Returns & Refunds",
     subtitle: "Hassle-free returns within 7 days",
