@@ -7,15 +7,18 @@ export function getApiErrorMessage(error: unknown, fallback = "Something went wr
 
   const fetchError = error as FetchBaseQueryError;
 
+  // This helper is used by every screen, not just uploads, so the wording here has to make
+  // sense on a sign-in form as much as on an image picker — and must not name a localhost
+  // port, which is meaningless to anyone using the deployed site.
   if ("status" in fetchError) {
     if (fetchError.status === 413) {
-      return "File is too large. Maximum size is 5 MB.";
+      return "That request is too large. Images must be under 5 MB.";
     }
-    if (fetchError.status === 502) {
-      return getApiErrorMessage(fetchError, "Backend is not running. Start the API on http://localhost:5241");
+    if (fetchError.status === 502 || fetchError.status === 503) {
+      return "The server is unavailable right now. Please try again in a moment.";
     }
-    if (fetchError.status === "FETCH_ERROR") {
-      return "Upload failed. Make sure the backend is running on port 5241.";
+    if (fetchError.status === "FETCH_ERROR" || fetchError.status === "TIMEOUT_ERROR") {
+      return "Couldn't reach the server. Check your connection and try again.";
     }
   }
 

@@ -27,7 +27,7 @@ async function proxyUpload(request: NextRequest, backendPath: string) {
     return NextResponse.json(
       {
         message:
-          "Could not reach the backend API. Start it on http://localhost:5241 and try again.",
+          "The server is unavailable right now. Please try again in a moment.",
       },
       { status: 502 },
     );

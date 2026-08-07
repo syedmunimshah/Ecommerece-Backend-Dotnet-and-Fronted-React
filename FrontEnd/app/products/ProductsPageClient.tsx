@@ -68,8 +68,7 @@ function ProductsContent({
         </div>
       ) : isError ? (
         <p className="py-12 text-center text-muted">
-          Could not load products. Make sure the backend is running at{" "}
-          <code className="text-xs">localhost:5241</code>
+          Could not load products. Please refresh, or try again in a moment.
         </p>
       ) : products.length === 0 ? (
         <p className="py-12 text-center text-muted">No products found.</p>

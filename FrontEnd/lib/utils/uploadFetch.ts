@@ -42,7 +42,7 @@ export async function postFileUpload<T>(
     return {
       error: {
         status: "FETCH_ERROR",
-        error: "Upload request failed. Check that the backend is running on port 5241.",
+        error: "Couldn't reach the server. Check your connection and try again.",
       },
     };
   }
