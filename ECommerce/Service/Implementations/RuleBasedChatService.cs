@@ -198,7 +198,12 @@ namespace Service.Implementations
 
             foreach (var product in products)
             {
-                text.AppendLine($"• {product.Name} — {Money(product.Price)}{StockNote(product.Stock)}");
+                // A product sold in options has no single price; its Price is the cheapest one,
+                // so say "from" rather than quoting a figure the customer may not be able to pay.
+                var price = product.Variants.Count > 0
+                    ? $"from {Money(product.Price)}"
+                    : Money(product.Price);
+                text.AppendLine($"• {product.Name} — {price}{StockNote(product.Stock)}");
             }
 
             var remaining = page.TotalRecords - products.Count;
@@ -279,7 +284,12 @@ namespace Service.Implementations
             text.AppendLine();
             foreach (var item in items)
             {
-                text.AppendLine($"• {item.ProductName} ×{item.Quantity} — {Money(item.Price * item.Quantity)}");
+                // Name the option, or a cart holding a small and a large of the same product
+                // reads as two identical lines.
+                var label = string.IsNullOrWhiteSpace(item.VariantName)
+                    ? item.ProductName
+                    : $"{item.ProductName} ({item.VariantName})";
+                text.AppendLine($"• {label} ×{item.Quantity} — {Money(item.Price * item.Quantity)}");
             }
 
             text.Append("Head to checkout when you're ready.");
