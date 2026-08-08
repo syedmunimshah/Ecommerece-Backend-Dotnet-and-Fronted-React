@@ -27,6 +27,7 @@ export function productDtoToProduct(dto: ProductDto): Product {
     description: dto.description ?? "",
     stock: dto.stock,
     seller: dto.sellerName ?? "EdgeCart",
+    variants: dto.variants ?? [],
   };
 }
 

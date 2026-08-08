@@ -18,6 +18,7 @@ namespace Repository.Entities
         public DbSet<SellerProfile> SellerProfiles { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<ProductVariant> ProductVariants { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -53,6 +54,35 @@ namespace Repository.Entities
                 .WithMany(s => s.Products)
                 .HasForeignKey(p => p.SellerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Product → Variants (1-M). Cascade is right here: a variant has no meaning without
+            // its product, so deleting the product should take its options with it.
+            modelBuilder.Entity<ProductVariant>()
+                .HasOne(v => v.Product)
+                .WithMany(p => p.Variants)
+                .HasForeignKey(v => v.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // A seller's own codes only have to be unique within their product.
+            modelBuilder.Entity<ProductVariant>()
+                .HasIndex(v => new { v.ProductId, v.Name })
+                .IsUnique();
+
+            // OrderItem → Variant is Restrict, unlike the cart. An order is a record of what was
+            // bought; removing a size must not delete or blank out past sales. Sellers deactivate
+            // a variant instead, and the order keeps VariantName either way.
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.ProductVariant)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductVariantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // The cart is disposable, so a deleted variant should just take the cart row with it.
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.ProductVariant)
+                .WithMany()
+                .HasForeignKey(ci => ci.ProductVariantId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Category → Products (1-M)
             modelBuilder.Entity<Product>()

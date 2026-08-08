@@ -166,7 +166,12 @@ export function OrderDetailView({
         <h2 className="font-semibold">Items</h2>
         <ul className="mt-4 divide-y divide-border">
           {order.items.map((item) => (
-            <li key={item.productId} className="flex justify-between gap-4 py-3 first:pt-0 last:pb-0">
+            // One order can hold the same product twice under different options, so the
+            // product id alone is no longer unique.
+            <li
+              key={`${item.productId}-${item.productVariantId ?? "base"}`}
+              className="flex justify-between gap-4 py-3 first:pt-0 last:pb-0"
+            >
               <div>
                 <Link
                   href={`/products/${item.productId}`}
@@ -174,6 +179,9 @@ export function OrderDetailView({
                 >
                   {item.productName}
                 </Link>
+                {item.variantName && (
+                  <p className="text-sm text-muted">{item.variantName}</p>
+                )}
                 <p className="text-sm text-muted">Qty: {item.quantity}</p>
                 {isUser ? (
                   <Link

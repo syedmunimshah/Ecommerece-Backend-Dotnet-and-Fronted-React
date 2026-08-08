@@ -8,6 +8,12 @@ namespace Service.DTO
         [Required]
         public int ProductId { get; set; }
 
+        /// <summary>
+        /// Required when the product has variants, rejected when it does not — the service
+        /// enforces both, so a client cannot add a bare shirt that only exists in sizes.
+        /// </summary>
+        public int? ProductVariantId { get; set; }
+
         [Required]
         [Range(1, int.MaxValue)]
         public int Quantity { get; set; }
@@ -28,6 +34,9 @@ namespace Service.DTO
         public int Id { get; set; }
         public int ProductId { get; set; }
         public string ProductName { get; set; }
+        public int? ProductVariantId { get; set; }
+        /// <summary>The chosen option's label, e.g. "Large". Null for single-form products.</summary>
+        public string? VariantName { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
     }

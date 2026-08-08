@@ -68,6 +68,9 @@ export default function CartPage() {
                   <Link href={`/products/${item.productId}`} className="font-semibold hover:text-accent">
                     {item.productName}
                   </Link>
+                  {item.variantName && (
+                    <p className="mt-0.5 text-sm text-muted">{item.variantName}</p>
+                  )}
                   <p className="mt-1 text-sm font-bold">{formatRs(item.price)}</p>
                   <div className="mt-auto flex items-center justify-between">
                     <div className="flex items-center rounded-lg border border-border">

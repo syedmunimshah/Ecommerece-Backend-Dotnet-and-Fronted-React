@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Repository.Entities
 {
@@ -10,6 +11,17 @@ namespace Repository.Entities
 
         public int ProductId { get; set; }
         public Product Product { get; set; }
+
+        public int? ProductVariantId { get; set; }
+        public ProductVariant? ProductVariant { get; set; }
+
+        /// <summary>
+        /// The variant's label as it was when ordered. Kept alongside the id for the same
+        /// reason the shipping address is copied onto the order: renaming "Large" to "XL"
+        /// later must not rewrite what a customer already bought.
+        /// </summary>
+        [MaxLength(80)]
+        public string? VariantName { get; set; }
 
         public int Quantity { get; set; }
         [Column(TypeName = "decimal(18,2)")]

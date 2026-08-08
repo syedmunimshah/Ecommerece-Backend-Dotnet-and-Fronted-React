@@ -17,6 +17,7 @@ namespace Service.Implementations
         private readonly IGenericRepository<Product> _productRepo;
         private readonly IGenericRepository<SellerProfile> _sellerProfileRepo;
         private readonly IGenericRepository<Category> _categoryRepo;
+        private readonly IGenericRepository<ProductVariant> _variantRepo;
         private readonly IProductRepository _productRepository;
         private readonly IGenericMapper _mapper;
 
@@ -24,6 +25,7 @@ namespace Service.Implementations
             IGenericRepository<Product> productRepo,
             IGenericRepository<SellerProfile> sellerProfileRepo,
             IGenericRepository<Category> categoryRepo,
+            IGenericRepository<ProductVariant> variantRepo,
             IGenericMapper mapper,
             IProductRepository productRepository
             )
@@ -31,6 +33,7 @@ namespace Service.Implementations
             _productRepo = productRepo;
             _sellerProfileRepo = sellerProfileRepo;
             _categoryRepo = categoryRepo;
+            _variantRepo = variantRepo;
             _mapper = mapper;
             _productRepository = productRepository;
         }
@@ -59,8 +62,10 @@ namespace Service.Implementations
             await _productRepo.AddAsync(entity);
             await _productRepo.SaveChangesAsync();
 
-            var created = await _productRepo.GetByIdAsync(entity.Id);
-            return _mapper.Map<Product, ProductDto>(created);
+            await SyncVariantsAsync(entity.Id, dto.Variants);
+
+            return await GetByIdAsync(entity.Id)
+                ?? _mapper.Map<Product, ProductDto>(entity);
         }
 
         public async Task<ProductDto?> GetByIdAsync(int id)
@@ -74,6 +79,7 @@ namespace Service.Implementations
             var dto = _mapper.Map<Product, ProductDto>(entity);
             dto.CategoryName = entity.Category?.Name;
             dto.SellerName = entity.Seller?.User?.FullName;
+            ApplyVariants(dto, entity);
             return dto;
         }
 
@@ -90,6 +96,7 @@ namespace Service.Implementations
 
                 dto.CategoryName = entity.Category?.Name;
                 dto.SellerName = entity.Seller?.User?.FullName;
+                ApplyVariants(dto, entity);
 
                 return dto;
             }).ToList();
@@ -138,7 +145,10 @@ namespace Service.Implementations
             _productRepo.Update(entity);
             await _productRepo.SaveChangesAsync();
 
-            return _mapper.Map<Product, ProductDto>(entity);
+            await SyncVariantsAsync(entity.Id, dto.Variants);
+
+            return await GetByIdAsync(entity.Id)
+                ?? _mapper.Map<Product, ProductDto>(entity);
         }
 
         public async Task DeleteProductAsync(int sellerUserId, int productId)
@@ -157,6 +167,108 @@ namespace Service.Implementations
 
             _productRepo.Delete(entity);
             await _productRepo.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Brings a product's options in line with what the seller submitted: new ones are added,
+        /// existing ones updated in place, and ones the seller dropped are deactivated rather
+        /// than deleted — past orders reference them, and a sold-out size that comes back next
+        /// season should not lose its sales history.
+        /// </summary>
+        private async Task SyncVariantsAsync(int productId, List<SaveProductVariantDto> submitted)
+        {
+            var existing = (await _variantRepo.FindGetAllAsync(v => v.ProductId == productId)).ToList();
+
+            // No variants section sent at all: leave whatever the product already has. Sending an
+            // empty list is how a seller says "sell this in a single form" — see below.
+            if (submitted == null)
+            {
+                return;
+            }
+
+            var duplicate = submitted
+                .GroupBy(v => v.Name.Trim(), StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault(g => g.Count() > 1);
+            if (duplicate != null)
+            {
+                throw new InvalidOperationException($"Duplicate option name '{duplicate.Key}'.");
+            }
+
+            var keptIds = new HashSet<int>();
+
+            foreach (var dto in submitted)
+            {
+                var match = dto.Id > 0 ? existing.FirstOrDefault(v => v.Id == dto.Id) : null;
+
+                if (match == null)
+                {
+                    await _variantRepo.AddAsync(new ProductVariant
+                    {
+                        ProductId = productId,
+                        Name = dto.Name.Trim(),
+                        Sku = string.IsNullOrWhiteSpace(dto.Sku) ? null : dto.Sku.Trim(),
+                        Price = dto.Price,
+                        Stock = dto.Stock,
+                        IsActive = dto.IsActive,
+                        SortOrder = dto.SortOrder,
+                        CreatedDate = DateTime.UtcNow,
+                    });
+                    continue;
+                }
+
+                keptIds.Add(match.Id);
+                match.Name = dto.Name.Trim();
+                match.Sku = string.IsNullOrWhiteSpace(dto.Sku) ? null : dto.Sku.Trim();
+                match.Price = dto.Price;
+                match.Stock = dto.Stock;
+                match.IsActive = dto.IsActive;
+                match.SortOrder = dto.SortOrder;
+                match.UpdateDate = DateTime.UtcNow;
+                _variantRepo.Update(match);
+            }
+
+            foreach (var dropped in existing.Where(v => v.IsActive && !keptIds.Contains(v.Id)))
+            {
+                dropped.IsActive = false;
+                dropped.UpdateDate = DateTime.UtcNow;
+                _variantRepo.Update(dropped);
+            }
+
+            await _variantRepo.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Copies a product's live options onto its DTO, and rewrites the headline price and
+        /// stock to match them: with options, the price shown is the cheapest one ("from PKR
+        /// 1,200") and the stock is the total across them, so a product whose small size sold
+        /// out does not read as out of stock.
+        /// </summary>
+        private static void ApplyVariants(ProductDto dto, Product entity)
+        {
+            var active = entity.Variants?.Where(v => v.IsActive)
+                                         .OrderBy(v => v.SortOrder)
+                                         .ThenBy(v => v.Id)
+                                         .ToList()
+                         ?? new List<ProductVariant>();
+
+            if (active.Count == 0)
+            {
+                return;
+            }
+
+            dto.Variants = active.Select(v => new ProductVariantDto
+            {
+                Id = v.Id,
+                Name = v.Name,
+                Sku = v.Sku,
+                Price = v.Price,
+                Stock = v.Stock,
+                IsActive = v.IsActive,
+                SortOrder = v.SortOrder,
+            }).ToList();
+
+            dto.Price = active.Min(v => v.Price);
+            dto.Stock = active.Sum(v => v.Stock);
         }
     }
 }

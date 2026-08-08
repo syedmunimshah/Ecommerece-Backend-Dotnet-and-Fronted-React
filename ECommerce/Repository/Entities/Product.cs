@@ -20,6 +20,7 @@ namespace Repository.Entities
         public int? CreatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
         public int? UpdateBy { get; set; }
+        public ICollection<ProductVariant> Variants { get; set; }
         public ICollection<OrderItem> OrderItems { get; set; }
         public ICollection<Review> Reviews { get; set; }
     }

@@ -86,11 +86,23 @@ export interface AdminUpdateUserDto {
   roleId: number;
 }
 
+export interface ProductVariantDto {
+  id: number;
+  name: string;
+  sku?: string | null;
+  price: number;
+  stock: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
 export interface ProductDto {
   id: number;
   name: string;
   description: string | null;
+  /** With variants this is the cheapest option's price — the "from" figure. */
   price: number;
+  /** With variants this is the total across options, not any one option's stock. */
   stock: number;
   isActive: boolean;
   image: string | null;
@@ -98,6 +110,19 @@ export interface ProductDto {
   categoryName: string | null;
   sellerName: string | null;
   sellerId: number;
+  /** Empty for a product sold in a single form. */
+  variants: ProductVariantDto[];
+}
+
+export interface SaveProductVariantDto {
+  /** 0 for a new option; an existing id updates that option in place. */
+  id: number;
+  name: string;
+  sku?: string | null;
+  price: number;
+  stock: number;
+  isActive: boolean;
+  sortOrder: number;
 }
 
 export interface CreateProductDto {
@@ -107,6 +132,7 @@ export interface CreateProductDto {
   stock: number;
   image?: string;
   categoryId?: number;
+  variants?: SaveProductVariantDto[];
 }
 
 export interface UpdateProductDto extends CreateProductDto {
@@ -123,6 +149,8 @@ export interface CartItemDto {
   id: number;
   productId: number;
   productName: string;
+  productVariantId?: number | null;
+  variantName?: string | null;
   quantity: number;
   price: number;
 }
@@ -138,6 +166,8 @@ export interface CartDto {
 export interface AddCartItemDto {
   productId: number;
   quantity: number;
+  /** Required when the product has variants, rejected when it does not. */
+  productVariantId?: number | null;
 }
 
 export interface UpdateCartItemDto {
@@ -148,6 +178,9 @@ export interface UpdateCartItemDto {
 export interface OrderItemDto {
   productId: number;
   productName: string;
+  productVariantId?: number | null;
+  /** The option as named when ordered; not looked up live. */
+  variantName?: string | null;
   quantity: number;
   price: number;
 }

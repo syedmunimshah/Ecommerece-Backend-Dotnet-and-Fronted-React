@@ -15,6 +15,8 @@ export interface CartItem {
   cartItemId: number;
   productId: number;
   productName: string;
+  /** The chosen option, e.g. "Large". Null for products sold in a single form. */
+  variantName: string | null;
   price: number;
   quantity: number;
   image?: string;
@@ -25,7 +27,8 @@ interface CartContextValue {
   count: number;
   total: number;
   isLoading: boolean;
-  addItem: (product: Product, qty?: number) => Promise<void>;
+  /** variantId is required for products sold in options; the API rejects a mismatch. */
+  addItem: (product: Product, qty?: number, variantId?: number | null) => Promise<void>;
   removeItem: (cartItemId: number) => Promise<void>;
   updateQty: (cartItemId: number, qty: number) => Promise<void>;
   refetch: () => void;
@@ -49,6 +52,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         cartItemId: item.id,
         productId: item.productId,
         productName: item.productName,
+        variantName: item.variantName ?? null,
         price: item.price,
         quantity: item.quantity,
       })) ?? [],
@@ -59,12 +63,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const total = cart?.totalAmount ?? items.reduce((s, i) => s + i.price * i.quantity, 0);
 
   const addItem = useCallback(
-    async (product: Product, qty = 1) => {
+    async (product: Product, qty = 1, variantId: number | null = null) => {
       if (!isAuthenticated) {
         router.push(`/login?redirect=${encodeURIComponent("/cart")}`);
         return;
       }
-      await addToCart({ productId: product.id, quantity: qty }).unwrap();
+      await addToCart({
+        productId: product.id,
+        quantity: qty,
+        productVariantId: variantId,
+      }).unwrap();
     },
     [isAuthenticated, addToCart, router],
   );

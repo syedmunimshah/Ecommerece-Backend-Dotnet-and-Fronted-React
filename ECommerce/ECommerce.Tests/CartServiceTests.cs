@@ -17,13 +17,22 @@ public class CartServiceTests
     private readonly Mock<IGenericRepository<Cart>> _carts = new();
     private readonly Mock<IGenericRepository<CartItem>> _items = new();
     private readonly Mock<IGenericRepository<Product>> _products = new();
+    private readonly Mock<IGenericRepository<ProductVariant>> _variants = new();
     private readonly Mock<IGenericRepository<User>> _users = new();
     private readonly Mock<IGenericMapper> _mapper = new();
 
     private const int UserId = 7;
 
     private CartService CreateService() =>
-        new(_carts.Object, _items.Object, _products.Object, _mapper.Object, _users.Object);
+        new(_carts.Object, _items.Object, _products.Object, _variants.Object, _mapper.Object, _users.Object);
+
+    public CartServiceTests()
+    {
+        // These products are sold in a single form. Without this the variant lookup returns
+        // null and every add fails on a NullReferenceException rather than the rule under test.
+        _variants.Setup(r => r.FindGetAllAsync(It.IsAny<Expression<Func<ProductVariant, bool>>>()))
+                 .ReturnsAsync(Array.Empty<ProductVariant>());
+    }
 
     /// <summary>Wires up the reads BuildCartDtoAsync performs after a successful mutation.</summary>
     private void StubCartRead(Cart cart, params CartItem[] itemsInCart)

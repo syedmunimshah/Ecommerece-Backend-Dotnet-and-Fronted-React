@@ -9,6 +9,12 @@ import { Breadcrumb, PageHeader } from "@/components/layout/PageShell";
 import { MotionButton } from "@/components/motion/MotionButton";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import { ProductImageUpload } from "@/components/product/ProductImageUpload";
+import {
+  ProductVariantsEditor,
+  findVariantProblem,
+} from "@/components/product/ProductVariantsEditor";
+import { getApiErrorMessage } from "@/lib/utils/apiError";
+import type { SaveProductVariantDto } from "@/lib/types/api";
 import Link from "next/link";
 import { useMounted } from "@/lib/hooks/useMounted";
 
@@ -25,6 +31,8 @@ export default function NewProductPage() {
   const [stock, setStock] = useState("10");
   const [image, setImage] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [variants, setVariants] = useState<SaveProductVariantDto[]>([]);
+  const [formError, setFormError] = useState<string | null>(null);
 
   if (!mounted) {
     return (
@@ -47,18 +55,29 @@ export default function NewProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
+    const problem = findVariantProblem(variants);
+    if (problem) {
+      setFormError(problem);
+      return;
+    }
+
     try {
       await createProduct({
         name,
         description,
-        price: Number(price),
-        stock: Number(stock),
+        // With options, these are only the fallback figures — each option carries its own
+        // price and stock, and the API derives the "from" price and total stock from them.
+        price: variants.length ? variants[0].price : Number(price),
+        stock: variants.length ? 0 : Number(stock),
         image: image || undefined,
         categoryId: categoryId ? Number(categoryId) : undefined,
+        variants,
       }).unwrap();
       router.push("/dashboard/products");
-    } catch {
-      /* error state */
+    } catch (err) {
+      setFormError(getApiErrorMessage(err, "Could not publish the product. Please try again."));
     }
   };
 
@@ -143,6 +162,16 @@ export default function NewProductPage() {
               className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-accent/30"
             />
           </div>
+          <ProductVariantsEditor
+            variants={variants}
+            onChange={setVariants}
+            disabled={isLoading}
+          />
+
+          {formError && (
+            <p className="rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-600">{formError}</p>
+          )}
+
           <MotionButton type="submit" disabled={isLoading}>
             {isLoading ? "Publishing..." : "Publish Product"}
           </MotionButton>

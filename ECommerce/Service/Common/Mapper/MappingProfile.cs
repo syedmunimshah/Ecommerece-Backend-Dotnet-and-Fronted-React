@@ -22,8 +22,16 @@ namespace Service.Common.Mapper
             CreateMap<CreateCategoryDto, Category>();
             CreateMap<UpdateCategoryDto, Category>();
             CreateMap<Category, CategoryDto>();
-            CreateMap<Product, CreateProductDto>().ReverseMap();
-            CreateMap<Product, ProductDto>();
+            // Variants are deliberately not mapped in either direction. Writing them through the
+            // product map would create rows straight from the request and skip ProductService's
+            // sync, which is what decides between adding, updating and deactivating an option.
+            // Reading them is done by ApplyVariants, which also filters out inactive ones.
+            CreateMap<Product, CreateProductDto>()
+                .ForMember(d => d.Variants, o => o.Ignore())
+                .ReverseMap()
+                .ForMember(d => d.Variants, o => o.Ignore());
+            CreateMap<Product, ProductDto>()
+                .ForMember(d => d.Variants, o => o.Ignore());
             CreateMap<Payment, PaymentDto>();
             CreateMap<Role, RoleDto>();
             CreateMap<CreateRoleDto, Role>();

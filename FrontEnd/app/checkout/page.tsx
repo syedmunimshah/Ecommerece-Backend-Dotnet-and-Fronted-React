@@ -170,7 +170,8 @@ export default function CheckoutPage() {
           {items.map((item) => (
             <div key={item.cartItemId} className="flex justify-between">
               <span className="text-muted">
-                {item.productName} × {item.quantity}
+                {item.productName}
+                {item.variantName ? ` (${item.variantName})` : ""} × {item.quantity}
               </span>
               <span>{formatRs(item.price * item.quantity)}</span>
             </div>

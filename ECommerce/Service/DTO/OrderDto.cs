@@ -8,6 +8,9 @@ namespace Service.DTO
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; }
+        public int? ProductVariantId { get; set; }
+        /// <summary>The option as it was named when ordered; never rewritten afterwards.</summary>
+        public string? VariantName { get; set; }
         public int Quantity { get; set; }
         public decimal Price { get; set; }
     }

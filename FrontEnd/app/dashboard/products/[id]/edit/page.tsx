@@ -15,6 +15,12 @@ import { MotionButton } from "@/components/motion/MotionButton";
 import { AnimateIn } from "@/components/ui/AnimateIn";
 import { ProductImageUpload } from "@/components/product/ProductImageUpload";
 import { useMounted } from "@/lib/hooks/useMounted";
+import {
+  ProductVariantsEditor,
+  findVariantProblem,
+} from "@/components/product/ProductVariantsEditor";
+import { getApiErrorMessage } from "@/lib/utils/apiError";
+import type { SaveProductVariantDto } from "@/lib/types/api";
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -34,6 +40,8 @@ export default function EditProductPage() {
   const [stock, setStock] = useState("");
   const [image, setImage] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [variants, setVariants] = useState<SaveProductVariantDto[]>([]);
+  const [formError, setFormError] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -44,6 +52,19 @@ export default function EditProductPage() {
     setStock(String(product.stock));
     setImage(product.image ?? "");
     setCategoryId(product.categoryId ? String(product.categoryId) : "");
+    // The API only returns active options, which is exactly what the editor should show —
+    // ones the seller previously removed stay hidden and stay on past orders.
+    setVariants(
+      (product.variants ?? []).map((v) => ({
+        id: v.id,
+        name: v.name,
+        sku: v.sku ?? null,
+        price: v.price,
+        stock: v.stock,
+        isActive: v.isActive,
+        sortOrder: v.sortOrder,
+      })),
+    );
     setHydrated(true);
   }, [product, hydrated]);
 
@@ -87,22 +108,31 @@ export default function EditProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+
+    const problem = findVariantProblem(variants);
+    if (problem) {
+      setFormError(problem);
+      return;
+    }
+
     try {
       await updateProduct({
         id: productId,
         data: {
           name,
           description,
-          price: Number(price),
-          stock: Number(stock),
+          price: variants.length ? variants[0].price : Number(price),
+          stock: variants.length ? 0 : Number(stock),
           image: image || undefined,
           categoryId: categoryId ? Number(categoryId) : undefined,
           isActive: product.isActive,
+          variants,
         },
       }).unwrap();
       router.push("/dashboard/products");
-    } catch {
-      /* error state */
+    } catch (err) {
+      setFormError(getApiErrorMessage(err, "Could not save the product. Please try again."));
     }
   };
 
@@ -187,6 +217,16 @@ export default function EditProductPage() {
               className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-accent/30"
             />
           </div>
+          <ProductVariantsEditor
+            variants={variants}
+            onChange={setVariants}
+            disabled={saving}
+          />
+
+          {formError && (
+            <p className="rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-600">{formError}</p>
+          )}
+
           <div className="flex flex-wrap gap-3">
             <MotionButton type="submit" disabled={saving}>
               {saving ? "Saving..." : "Save Changes"}

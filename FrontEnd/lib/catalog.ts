@@ -1,3 +1,4 @@
+import type { ProductVariantDto } from "@/lib/types/api";
 import {
   FEATURED_PRODUCTS,
   FLASH_SALE_PRODUCTS,
@@ -19,6 +20,8 @@ export interface Product {
   description: string;
   stock: number;
   seller: string;
+  /** Options this product is sold in. Empty for a single-form product. */
+  variants?: ProductVariantDto[];
 }
 
 function inferSlug(name: string): string {

@@ -22,7 +22,7 @@ namespace Repository.Implementations
         public Task<Product?> GetProductWithDetails(int id)
         {
 
-           return _context.Products.AsNoTracking().Include(s=>s.Seller).ThenInclude(u=>u.User).Include(c=>c.Category).FirstOrDefaultAsync(s=>s.Id == id);
+           return _context.Products.AsNoTracking().Include(s=>s.Seller).ThenInclude(u=>u.User).Include(c=>c.Category).Include(p=>p.Variants).FirstOrDefaultAsync(s=>s.Id == id);
         }
 
         public async Task<PagedResponse<Product>> GetAllPagedProductWithDetails(
@@ -35,6 +35,7 @@ namespace Repository.Implementations
                 .AsNoTracking()
                 .Include(s => s.Seller).ThenInclude(u => u.User)
                 .Include(c => c.Category)
+                .Include(p => p.Variants)
                 .AsQueryable();
 
             if (sellerId.HasValue)

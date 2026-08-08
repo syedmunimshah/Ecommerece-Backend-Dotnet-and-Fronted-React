@@ -19,6 +19,7 @@ namespace Service.Implementations
         private readonly IGenericRepository<Cart> _cartRepo;
         private readonly IGenericRepository<CartItem> _cartItemRepo;
         private readonly IGenericRepository<Product> _productRepo;
+        private readonly IGenericRepository<ProductVariant> _variantRepo;
         private readonly IGenericRepository<SellerProfile> _sellerProfileRepo;
         private readonly IGenericRepository<OrderTracking> _orderTrackingRepo;
         private readonly IUnitOfWork _unitOfWork;
@@ -30,6 +31,7 @@ namespace Service.Implementations
             IGenericRepository<Cart> cartRepo,
             IGenericRepository<CartItem> cartItemRepo,
             IGenericRepository<Product> productRepo,
+            IGenericRepository<ProductVariant> variantRepo,
             IGenericRepository<SellerProfile> sellerProfileRepo,
             IGenericRepository<OrderTracking> orderTrackingRepo,
             IUnitOfWork unitOfWork,
@@ -40,6 +42,7 @@ namespace Service.Implementations
             _cartRepo = cartRepo;
             _cartItemRepo = cartItemRepo;
             _productRepo = productRepo;
+            _variantRepo = variantRepo;
             _sellerProfileRepo = sellerProfileRepo;
             _orderTrackingRepo = orderTrackingRepo;
             _unitOfWork = unitOfWork;
@@ -65,6 +68,17 @@ namespace Service.Implementations
             var products = (await _productRepo.FindGetAllAsync(p => productIds.Contains(p.Id)))
                 .ToDictionary(p => p.Id);
 
+            // Options referenced by the cart. Price and stock come from the chosen option when
+            // there is one, so an order for size M can never be paid for or decremented at the
+            // product's own figures.
+            var variantIds = cartItems.Where(ci => ci.ProductVariantId.HasValue)
+                                      .Select(ci => ci.ProductVariantId!.Value)
+                                      .Distinct().ToList();
+            var variants = variantIds.Count == 0
+                ? new Dictionary<int, ProductVariant>()
+                : (await _variantRepo.FindGetAllAsync(v => variantIds.Contains(v.Id)))
+                    .ToDictionary(v => v.Id);
+
             // Validate availability + stock and compute the server-side total BEFORE writing anything.
             decimal totalAmount = 0;
             foreach (var ci in cartItems)
@@ -77,12 +91,29 @@ namespace Service.Implementations
                 {
                     throw new InvalidOperationException($"Product '{product.Name}' is no longer available.");
                 }
-                if (product.Stock < ci.Quantity)
+
+                ProductVariant? variant = null;
+                if (ci.ProductVariantId.HasValue
+                    && !variants.TryGetValue(ci.ProductVariantId.Value, out variant))
                 {
                     throw new InvalidOperationException(
-                        $"Insufficient stock for '{product.Name}'. Available: {product.Stock}, requested: {ci.Quantity}.");
+                        $"An option of '{product.Name}' is no longer available. Please review your cart.");
                 }
-                totalAmount += product.Price * ci.Quantity;
+                if (variant is { IsActive: false })
+                {
+                    throw new InvalidOperationException(
+                        $"'{product.Name} ({variant.Name})' is no longer available.");
+                }
+
+                var label = variant == null ? product.Name : $"{product.Name} ({variant.Name})";
+                var available = variant?.Stock ?? product.Stock;
+                if (available < ci.Quantity)
+                {
+                    throw new InvalidOperationException(
+                        $"Insufficient stock for '{label}'. Available: {available}, requested: {ci.Quantity}.");
+                }
+
+                totalAmount += (variant?.Price ?? product.Price) * ci.Quantity;
             }
 
             // Order creation, stock decrement and cart clearing must be atomic.
@@ -110,18 +141,33 @@ namespace Service.Implementations
                 foreach (var ci in cartItems)
                 {
                     var product = products[ci.ProductId];
+                    var variant = ci.ProductVariantId.HasValue
+                        ? variants[ci.ProductVariantId.Value]
+                        : null;
 
                     await _orderItemRepo.AddAsync(new OrderItem
                     {
                         OrderId = order.Id,
                         ProductId = ci.ProductId,
+                        ProductVariantId = variant?.Id,
+                        // Copied, not looked up later: renaming "Large" to "XL" next month must
+                        // not rewrite what this customer actually bought.
+                        VariantName = variant?.Name,
                         Quantity = ci.Quantity,
-                        Price = product.Price,
+                        Price = variant?.Price ?? product.Price,
                         CreatedDate = DateTime.UtcNow
                     });
 
-                    product.Stock -= ci.Quantity;
-                    _productRepo.Update(product);
+                    if (variant != null)
+                    {
+                        variant.Stock -= ci.Quantity;
+                        _variantRepo.Update(variant);
+                    }
+                    else
+                    {
+                        product.Stock -= ci.Quantity;
+                        _productRepo.Update(product);
+                    }
 
                     _cartItemRepo.Delete(ci);
                 }
@@ -317,6 +363,8 @@ namespace Service.Implementations
             {
                 ProductId = oi.ProductId,
                 ProductName = products.GetValueOrDefault(oi.ProductId) ?? string.Empty,
+                ProductVariantId = oi.ProductVariantId,
+                VariantName = oi.VariantName,
                 Quantity = oi.Quantity,
                 Price = oi.Price
             }).ToList();
