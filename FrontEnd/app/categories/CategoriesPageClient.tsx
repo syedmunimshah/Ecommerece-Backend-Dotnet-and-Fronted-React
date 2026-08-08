@@ -9,11 +9,11 @@ import { StaggerContainer, StaggerItem } from "@/components/ui/AnimateIn";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 const ICON_MAP: Record<string, { icon: typeof Package; iconColor: string; iconBg: string }> = {
-  gaming: { icon: Gamepad2, iconColor: "text-purple-600", iconBg: "bg-purple-100 dark:bg-purple-900/30" },
-  mobile: { icon: Smartphone, iconColor: "text-blue-600", iconBg: "bg-blue-100 dark:bg-blue-900/30" },
-  laptops: { icon: Laptop, iconColor: "text-indigo-600", iconBg: "bg-indigo-100 dark:bg-indigo-900/30" },
-  audio: { icon: Headphones, iconColor: "text-emerald-600", iconBg: "bg-emerald-100 dark:bg-emerald-900/30" },
-  fashion: { icon: Shirt, iconColor: "text-pink-600", iconBg: "bg-pink-100 dark:bg-pink-900/30" },
+  gaming: { icon: Gamepad2, iconColor: "text-orange-600", iconBg: "bg-orange-100 dark:bg-orange-900/30" },
+  mobile: { icon: Smartphone, iconColor: "text-teal-700", iconBg: "bg-teal-100 dark:bg-teal-900/30" },
+  laptops: { icon: Laptop, iconColor: "text-stone-700", iconBg: "bg-stone-200 dark:bg-stone-800/50" },
+  audio: { icon: Headphones, iconColor: "text-amber-700", iconBg: "bg-amber-100 dark:bg-amber-900/30" },
+  fashion: { icon: Shirt, iconColor: "text-rose-700", iconBg: "bg-rose-100 dark:bg-rose-900/30" },
 };
 
 function getCategoryStyle(slug: string) {

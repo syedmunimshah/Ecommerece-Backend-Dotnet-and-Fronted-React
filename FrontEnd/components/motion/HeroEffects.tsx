@@ -36,11 +36,11 @@ export function HeroEffects({ mouse }: { mouse: { x: number; y: number } }) {
       />
       <motion.div
         style={{ y: orbY2, scale: orbScale }}
-        className="absolute -right-20 bottom-20 h-80 w-80 rounded-full bg-purple-300/20 blur-3xl"
+        className="absolute -right-20 bottom-20 h-80 w-80 rounded-full bg-[var(--accent)]/20 blur-3xl"
       />
       <motion.div
         style={{ y: orbY2 }}
-        className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-blue-400/10 blur-3xl"
+        className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-[var(--seller)]/12 blur-3xl"
       />
     </div>
   );

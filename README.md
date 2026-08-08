@@ -10,6 +10,8 @@
 ![Stripe](https://img.shields.io/badge/Payments-Stripe-635BFF?logo=stripe&logoColor=white)
 ![Azure](https://img.shields.io/badge/Hosted_on-Azure-0078D4?logo=microsoftazure&logoColor=white)
 
+![EdgeCart storefront](docs/screenshots/home.png)
+
 ---
 
 ## Live Demo
@@ -88,6 +90,33 @@ It's built as a portfolio project — every feature below is implemented and wor
 | State/data | Redux Toolkit + RTK Query |
 | Styling | Tailwind CSS |
 | Animation | Framer Motion |
+
+---
+
+## Screenshots
+
+**Products sold in options** — each size carries its own price and stock, so the page shows a
+"from" price until one is picked, and the stock line follows the selection.
+
+![Product page with size options](docs/screenshots/product-variants.png)
+
+**Checkout** — the delivery address is captured here and copied onto the order, so a later
+profile edit cannot rewrite where a past order was sent.
+
+![Checkout with delivery details](docs/screenshots/checkout.png)
+
+<details>
+<summary>More — catalogue, cart, orders, seller and admin</summary>
+
+| | |
+|---|---|
+| Catalogue | ![Catalogue](docs/screenshots/products.png) |
+| Cart | ![Cart](docs/screenshots/cart.png) |
+| Customer orders | ![Orders](docs/screenshots/dashboard-orders.png) |
+| Seller — new product | ![Seller product form](docs/screenshots/seller-product-form.png) |
+| Admin — users | ![Admin users](docs/screenshots/admin-users.png) |
+
+</details>
 
 ---
 
@@ -227,7 +256,7 @@ The backend seeds these on first run so you can try every role immediately:
 - [x] Dockerfile + docker-compose for one-command local setup
 - [x] GitHub Actions pipeline
 - [x] Shopping assistant that runs without an API key
-- [ ] Screenshots in this README
+- [x] Screenshots in this README
 
 ---
 

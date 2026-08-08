@@ -5,25 +5,25 @@
 :root,
 [data-theme="light"] {
   --background: #ffffff;
-  --foreground: #0a0a0a;
-  --surface: #f8f9fb;
+  --foreground: #0C0C0E;
+  --surface: #F4F4F5;
   --muted: #6b7280;
   --border: #e5e7eb;
-  --accent: #2563eb;
+  --accent: #E8430F;
   --accent-foreground: #ffffff;
-  --seller: #7c3aed;
+  --seller: #0F5C4A;
 
   /* RGB channels for the same colors. Tailwind needs these to build the opacity
      modifiers (bg-surface/90, ring-accent/30); it cannot apply alpha to a hex held
      in a var, and silently drops the rule when asked to. The hex vars above stay
      for direct use in plain CSS. Keep both in sync. */
-  --accent-rgb: 37 99 235;
-  --surface-rgb: 248 249 251;
-  --foreground-rgb: 10 10 10;
+  --accent-rgb: 232 67 15;
+  --surface-rgb: 244 244 245;
+  --foreground-rgb: 12 12 14;
   --background-rgb: 255 255 255;
   --border-rgb: 229 231 235;
   --muted-rgb: 107 114 128;
-  --seller-rgb: 124 58 237;
+  --seller-rgb: 15 92 74;
   --nav-bg: #ffffff;
   --nav-text: #111827;
   --hero-wave: #ffffff;
@@ -53,54 +53,56 @@
   --app-phone-notch: #111827;
   --app-phone-placeholder: #e5e7eb;
   --footer-bg: #f9fafb;
-  --auth-from: #dbeafe;
-  --auth-via: #e8e4ff;
-  --auth-to: #ede9fe;
-  --auth-blob-1: rgba(37, 99, 235, 0.45);
-  --auth-blob-2: rgba(91, 76, 240, 0.35);
-  --auth-blob-3: rgba(124, 58, 237, 0.38);
+  --auth-from: #FBFAF9;
+  --auth-via: #F4F2F0;
+  --auth-to: #EDEAE6;
+  --auth-blob-1: rgba(232, 67, 15, 0.16);
+  --auth-blob-2: rgba(15, 92, 74, 0.12);
+  --auth-blob-3: rgba(12, 12, 14, 0.08);
   --auth-card-bg: rgba(255, 255, 255, 0.94);
-  --auth-card-border: rgba(37, 99, 235, 0.12);
-  --auth-card-shadow: 0 28px 90px -24px rgba(37, 99, 235, 0.35);
-  --auth-glow: rgba(45, 127, 249, 0.2);
+  --auth-card-border: rgba(12, 12, 14, 0.10);
+  --auth-card-shadow: 0 28px 90px -24px rgba(12, 12, 14, 0.20);
+  --auth-glow: rgba(232, 67, 15, 0.10);
   --auth-grid-opacity: 0.35;
 
   /* Premium accent + elevation system */
-  --accent-hover: #1d4ed8;
-  --accent-soft: rgba(37, 99, 235, 0.08);
-  --accent-gradient: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-  --ring: rgba(37, 99, 235, 0.4);
+  --accent-hover: #C3350A;
+  --accent-soft: rgba(232, 67, 15, 0.08);
+  --accent-gradient: linear-gradient(135deg, #E8430F 0%, #C3350A 100%);
+  --ring: rgba(232, 67, 15, 0.4);
   --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
   --shadow-card: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px -1px rgba(16, 24, 40, 0.06);
-  --shadow-card-hover: 0 24px 48px -16px rgba(37, 99, 235, 0.28), 0 12px 24px -12px rgba(16, 24, 40, 0.12);
+  --shadow-card-hover: 0 24px 48px -16px rgba(12, 12, 14, 0.18), 0 12px 24px -12px rgba(12, 12, 14, 0.10);
 }
 
 [data-theme="dark"] {
-  --background: #0b0f19;
-  --foreground: #f3f4f6;
-  --surface: #111827;
-  --muted: #9ca3af;
-  --border: #1f2937;
-  --accent: #3b82f6;
-  --accent-foreground: #ffffff;
-  --seller: #a78bfa;
+  /* Neutral greys, not blue-tinted ones: the accent is the only warm thing on the page. */
+  --background: #0A0A0C;
+  --foreground: #F2F2F0;
+  --surface: #141416;
+  --muted: #9A9A97;
+  --border: #262629;
+  /* Lifted from the light accent so it still reads on a near-black background. */
+  --accent: #FF6A3D;
+  --accent-foreground: #14100E;
+  --seller: #2DD4A0;
 
   /* Dark-theme channels — must mirror the hex values above. */
-  --accent-rgb: 59 130 246;
-  --surface-rgb: 17 24 39;
-  --foreground-rgb: 243 244 246;
-  --background-rgb: 11 15 25;
-  --border-rgb: 31 41 55;
-  --muted-rgb: 156 163 175;
-  --seller-rgb: 167 139 250;
-  --nav-bg: #0f1419;
+  --accent-rgb: 255 106 61;
+  --surface-rgb: 20 20 22;
+  --foreground-rgb: 242 242 240;
+  --background-rgb: 10 10 12;
+  --border-rgb: 38 38 41;
+  --muted-rgb: 154 154 151;
+  --seller-rgb: 45 212 160;
+  --nav-bg: #0E0E10;
   --nav-text: #f9fafb;
-  --hero-wave: #0b0f19;
-  --search-bg: #1f2937;
-  --chip-bg: #1f2937;
-  --section-muted: #0f1419;
-  --card-bg: #151b28;
-  --flash-card-bg: #1a2234;
+  --hero-wave: #0A0A0C;
+  --search-bg: #1B1B1E;
+  --chip-bg: #1B1B1E;
+  --section-muted: #0E0E10;
+  --card-bg: #141416;
+  --flash-card-bg: #1B1B1E;
   --flash-card-text: #f9fafb;
   --flash-btn-bg: #f9fafb;
   --flash-btn-text: #111827;
@@ -108,36 +110,36 @@
   --product-btn-text: #111827;
   --product-badge-bg: #f9fafb;
   --product-badge-text: #111827;
-  --mobile-app-banner-bg: #0a0e17;
+  --mobile-app-banner-bg: #08080A;
   --mobile-app-btn-bg: #e5e7eb;
   --mobile-app-btn-text: #111827;
-  --app-cta-bg: #0f1419;
+  --app-cta-bg: #0E0E10;
   --app-cta-text: #f9fafb;
   --app-cta-muted: #9ca3af;
   --app-store-primary-bg: #f9fafb;
   --app-store-primary-text: #111827;
   --app-store-outline-border: rgba(255, 255, 255, 0.3);
-  --app-phone-border: #0a0a12;
+  --app-phone-border: #08080A;
   --app-phone-screen: #f3f4f6;
   --app-phone-notch: #111827;
   --app-phone-placeholder: #d1d5db;
-  --footer-bg: #0a0e17;
-  --auth-from: #070b14;
-  --auth-via: #0f1628;
-  --auth-to: #1a1040;
-  --auth-blob-1: rgba(59, 130, 246, 0.28);
-  --auth-blob-2: rgba(91, 76, 240, 0.22);
-  --auth-blob-3: rgba(139, 92, 246, 0.25);
+  --footer-bg: #08080A;
+  --auth-from: #0A0A0C;
+  --auth-via: #121214;
+  --auth-to: #17130F;
+  --auth-blob-1: rgba(255, 106, 61, 0.18);
+  --auth-blob-2: rgba(45, 212, 160, 0.10);
+  --auth-blob-3: rgba(255, 255, 255, 0.05);
   --auth-card-bg: rgba(21, 27, 40, 0.9);
-  --auth-card-border: rgba(59, 130, 246, 0.18);
-  --auth-card-shadow: 0 28px 90px -24px rgba(59, 130, 246, 0.22);
-  --auth-glow: rgba(59, 130, 246, 0.15);
+  --auth-card-border: rgba(255, 255, 255, 0.10);
+  --auth-card-shadow: 0 28px 90px -24px rgba(0, 0, 0, 0.6);
+  --auth-glow: rgba(255, 106, 61, 0.12);
   --auth-grid-opacity: 0.18;
 
-  --accent-hover: #60a5fa;
-  --accent-soft: rgba(59, 130, 246, 0.14);
-  --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #a78bfa 100%);
-  --ring: rgba(59, 130, 246, 0.45);
+  --accent-hover: #FF7A4D;
+  --accent-soft: rgba(255, 106, 61, 0.14);
+  --accent-gradient: linear-gradient(135deg, #FF6A3D 0%, #E8430F 100%);
+  --ring: rgba(255, 106, 61, 0.45);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.5);
   --shadow-card-hover: 0 24px 48px -16px rgba(99, 102, 241, 0.4), 0 12px 24px -12px rgba(0, 0, 0, 0.5);
@@ -153,6 +155,16 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Headings carry the display face; body text stays on the plain one. Applied here rather
+     than per-component so a new page inherits it without remembering to. Tightened tracking
+     because the display face is wide at large sizes. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), var(--font-body), sans-serif;
+    letter-spacing: -0.022em;
   }
 
   /* Refined text selection */

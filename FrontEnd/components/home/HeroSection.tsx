@@ -30,9 +30,12 @@ function HeroWave() {
 export function HeroSection() {
   const [mouse, setMouse] = useState({ x: 50, y: 50 });
 
+  // Ink, not a blue-to-violet ramp. A dark neutral lets the product photography and the single
+  // accent do the work; the old gradient was the loudest thing on the page and the most
+  // recognisable "generated site" tell.
   return (
     <section
-      className="relative overflow-hidden bg-gradient-to-br from-[#2d7ff9] via-[#5b4cf0] to-[#7c3aed] px-4 pb-14 pt-8 sm:px-6 sm:pb-20 sm:pt-12 lg:pb-32 lg:pt-20"
+      className="relative overflow-hidden bg-[#131316] bg-[radial-gradient(120%_120%_at_15%_0%,#1F1F23_0%,#131316_45%,#0C0C0E_100%)] px-4 pb-14 pt-8 sm:px-6 sm:pb-20 sm:pt-12 lg:pb-32 lg:pt-20"
       onMouseMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         setMouse({

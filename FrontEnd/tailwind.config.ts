@@ -26,7 +26,8 @@ const config: Config = {
         "accent-soft": "var(--accent-soft)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-body)", "sans-serif"],
       },
       boxShadow: {
         hero: "0 32px 64px -12px rgba(0, 0, 0, 0.35)",

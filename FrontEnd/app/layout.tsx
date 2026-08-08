@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Bricolage_Grotesque, Public_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Geist is Next.js's own default and turns up on every starter, so it reads as a template
+// rather than a decision. A display face for headings against a plain workhorse for body
+// text gives the page a voice without hurting readability at small sizes.
+const display = Bricolage_Grotesque({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+});
+
+const body = Public_Sans({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
@@ -20,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={geistSans.variable} suppressHydrationWarning>
+    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
