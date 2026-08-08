@@ -21,6 +21,7 @@ import type {
   AddCartItemDto,
   UpdateCartItemDto,
   OrderDto,
+  CreateOrderDto,
   OrderTrackingDto,
   CreatePaymentDto,
   PaymentDto,
@@ -234,11 +235,11 @@ export const api = baseApi.injectEndpoints({
     }),
 
     // ─── Orders ───
-    createOrder: builder.mutation<OrderDto, void>({
-      query: () => ({
+    createOrder: builder.mutation<OrderDto, CreateOrderDto>({
+      query: (body) => ({
         url: "/api/orders/create",
         method: "POST",
-        body: {},
+        body,
       }),
       invalidatesTags: ["Order", "Cart"],
     }),

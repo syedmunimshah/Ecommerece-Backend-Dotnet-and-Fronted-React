@@ -20,6 +20,9 @@ using Microsoft.Extensions.FileProviders;
 using Azure.Storage.Blobs;
 using Serilog;
 using Anthropic;
+using System.Globalization;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +53,38 @@ builder.Services.AddCors(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
+
+// Throttle the endpoints worth guessing at. Sign-in, registration and the OTP routes are
+// the ones an attacker can hammer: without a limit, a password or a six-digit OTP is only
+// as strong as how fast requests can be sent. Partitioned by caller IP so one attacker
+// cannot lock everyone else out, and the app runs behind a proxy, so this must sit after
+// UseForwardedHeaders to see the real address rather than the load balancer's.
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
+        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        factory: _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 10,
+            Window = TimeSpan.FromMinutes(1),
+            QueueLimit = 0,
+        }));
+
+    // Say how long to wait rather than failing blankly; the client shows this verbatim.
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter =
+                ((int)retryAfter.TotalSeconds).ToString(NumberFormatInfo.InvariantInfo);
+        }
+
+        await context.HttpContext.Response.WriteAsync(
+            "Too many attempts. Please wait a minute and try again.", cancellationToken);
+    };
+});
 
 // Honor X-Forwarded-* when running behind a reverse proxy (Azure App Service).
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -205,6 +240,10 @@ if (!string.IsNullOrWhiteSpace(uploadsRoot))
         RequestPath = "/uploads"
     });
 }
+
+// After UseForwardedHeaders, so the limiter partitions on the caller's real IP rather than
+// the Azure load balancer's — otherwise every request shares one bucket.
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

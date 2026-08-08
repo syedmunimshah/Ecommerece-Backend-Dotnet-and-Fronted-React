@@ -152,6 +152,15 @@ export interface OrderItemDto {
   price: number;
 }
 
+export interface ShippingAddressDto {
+  name: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode?: string | null;
+  notes?: string | null;
+}
+
 export interface OrderDto {
   id: number;
   userId: number;
@@ -159,6 +168,12 @@ export interface OrderDto {
   status: string;
   createdDate: string | null;
   items: OrderItemDto[];
+  /** Null on orders placed before delivery addresses were collected. */
+  shippingAddress: ShippingAddressDto | null;
+}
+
+export interface CreateOrderDto {
+  shippingAddress: ShippingAddressDto;
 }
 
 export interface OrderTrackingDto {

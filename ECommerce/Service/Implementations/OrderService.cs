@@ -46,8 +46,11 @@ namespace Service.Implementations
             _mapper = mapper;
         }
 
-        public async Task<OrderDto> CreateOrderFromCartAsync(int userId)
+        public async Task<OrderDto> CreateOrderFromCartAsync(int userId, CreateOrderDto dto)
         {
+            var address = dto?.ShippingAddress
+                ?? throw new InvalidOperationException("A delivery address is required.");
+
             var cart = await _cartRepo.FirstOrDefaultAsync(c => c.UserId == userId)
                 ?? throw new InvalidOperationException("Cart not found.");
 
@@ -91,7 +94,15 @@ namespace Service.Implementations
                     UserId = userId,
                     TotalAmount = totalAmount,
                     Status = "Pending",
-                    CreatedDate = DateTime.UtcNow
+                    CreatedDate = DateTime.UtcNow,
+                    ShippingName = address.Name?.Trim(),
+                    ShippingPhone = address.Phone?.Trim(),
+                    ShippingAddress = address.Address?.Trim(),
+                    ShippingCity = address.City?.Trim(),
+                    ShippingPostalCode = string.IsNullOrWhiteSpace(address.PostalCode)
+                        ? null : address.PostalCode.Trim(),
+                    ShippingNotes = string.IsNullOrWhiteSpace(address.Notes)
+                        ? null : address.Notes.Trim(),
                 };
                 await _orderRepo.AddAsync(order);
                 await _unitOfWork.SaveChangesAsync(); // materialize order.Id
@@ -317,7 +328,18 @@ namespace Service.Implementations
                 TotalAmount = order.TotalAmount,
                 Status = order.Status,
                 CreatedDate = order.CreatedDate,
-                Items = itemDtos
+                Items = itemDtos,
+                // Null for orders placed before addresses were collected, so the UI can fall
+                // back rather than render an empty address block.
+                ShippingAddress = order.ShippingAddress is null ? null : new ShippingAddressDto
+                {
+                    Name = order.ShippingName ?? string.Empty,
+                    Phone = order.ShippingPhone ?? string.Empty,
+                    Address = order.ShippingAddress,
+                    City = order.ShippingCity ?? string.Empty,
+                    PostalCode = order.ShippingPostalCode,
+                    Notes = order.ShippingNotes,
+                }
             };
         }
 

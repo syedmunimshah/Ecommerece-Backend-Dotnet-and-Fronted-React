@@ -10,6 +10,9 @@ import { useCreateOrderMutation, useCreatePaymentMutation } from "@/lib/store/ap
 import { Breadcrumb, PageHeader } from "@/components/layout/PageShell";
 import { formatRs } from "@/lib/format";
 import { MotionButton } from "@/components/motion/MotionButton";
+import { getApiErrorMessage } from "@/lib/utils/apiError";
+import { cn } from "@/lib/cn";
+import type { ShippingAddressDto } from "@/lib/types/api";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -20,9 +23,25 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("Card");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [address, setAddress] = useState<ShippingAddressDto>({
+    name: "",
+    phone: "",
+    address: "",
+    city: "",
+    postalCode: "",
+    notes: "",
+  });
 
   const shipping = total >= 3500 ? 0 : 250;
   const grandTotal = total + shipping;
+
+  const setField = (field: keyof ShippingAddressDto) => (value: string) =>
+    setAddress((prev) => ({ ...prev, [field]: value }));
+
+  // The API validates these too — this only saves a round trip and points at the field.
+  const missing = (["name", "phone", "address", "city"] as const).filter(
+    (f) => !address[f].trim(),
+  );
 
   if (!isAuthenticated) {
     return (
@@ -56,10 +75,15 @@ export default function CheckoutPage() {
   }
 
   const handlePlaceOrder = async () => {
+    if (missing.length) {
+      setError("Please fill in the delivery details before placing the order.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const order = await createOrder().unwrap();
+      const order = await createOrder({ shippingAddress: address }).unwrap();
       const result = await createPayment({
         orderId: order.id,
         paymentMethod,
@@ -72,8 +96,8 @@ export default function CheckoutPage() {
       }
 
       router.push(`/dashboard/orders?success=${order.id}`);
-    } catch {
-      setError("Checkout failed. Please try again.");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Checkout failed. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -83,7 +107,65 @@ export default function CheckoutPage() {
     <div className="container-page py-10 sm:py-14">
       <Breadcrumb items={[{ label: "Cart", href: "/cart" }, { label: "Checkout" }]} />
       <PageHeader title="Checkout" subtitle="Review and place your order" />
-      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-[var(--card-bg)] p-6 sm:p-8">
+      <div className="mx-auto max-w-lg space-y-6">
+        <div className="rounded-2xl border border-border bg-[var(--card-bg)] p-6 sm:p-8">
+          <h2 className="text-base font-semibold text-foreground">Delivery details</h2>
+          <p className="mt-1 text-sm text-muted">Where should we send this order?</p>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Full name"
+              value={address.name}
+              onChange={setField("name")}
+              placeholder="Ali Khan"
+              autoComplete="name"
+              className="sm:col-span-2"
+            />
+            <Field
+              label="Phone"
+              value={address.phone}
+              onChange={setField("phone")}
+              placeholder="0300 1234567"
+              inputMode="tel"
+              autoComplete="tel"
+              className="sm:col-span-2"
+            />
+            <Field
+              label="Address"
+              value={address.address}
+              onChange={setField("address")}
+              placeholder="House 12, Street 4, Gulshan-e-Iqbal"
+              autoComplete="street-address"
+              className="sm:col-span-2"
+            />
+            <Field
+              label="City"
+              value={address.city}
+              onChange={setField("city")}
+              placeholder="Karachi"
+              autoComplete="address-level2"
+            />
+            <Field
+              label="Postal code"
+              value={address.postalCode ?? ""}
+              onChange={setField("postalCode")}
+              placeholder="75300"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              optional
+            />
+            <Field
+              label="Delivery notes"
+              value={address.notes ?? ""}
+              onChange={setField("notes")}
+              placeholder="Ring the bell twice, second floor"
+              className="sm:col-span-2"
+              optional
+            />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-[var(--card-bg)] p-6 sm:p-8">
         <div className="space-y-2 text-sm">
           {items.map((item) => (
             <div key={item.cartItemId} className="flex justify-between">
@@ -128,7 +210,45 @@ export default function CheckoutPage() {
           <CheckCircle2 className="h-4 w-4" />
           Payments secured by Stripe
         </p>
+        </div>
       </div>
     </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+  className,
+  optional,
+  inputMode,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+  optional?: boolean;
+  inputMode?: "tel" | "numeric";
+  autoComplete?: string;
+}) {
+  return (
+    <label className={cn("block", className)}>
+      <span className="mb-1.5 block text-sm font-medium text-foreground">
+        {label}
+        {optional && <span className="ml-1 font-normal text-muted">(optional)</span>}
+      </span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        inputMode={inputMode}
+        autoComplete={autoComplete}
+        className="h-11 w-full rounded-xl border border-border bg-surface px-4 text-sm text-foreground placeholder:text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/30"
+      />
+    </label>
   );
 }

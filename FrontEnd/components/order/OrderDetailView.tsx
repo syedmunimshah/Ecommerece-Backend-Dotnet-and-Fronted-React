@@ -10,6 +10,7 @@ import {
 import { useAuth } from "@/features/auth/useAuth";
 import { formatRs } from "@/lib/format";
 import { getOrderStatusClass } from "@/lib/orderStatus";
+import { ShippingAddressCard } from "@/components/order/ShippingAddressCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { MotionButton } from "@/components/motion/MotionButton";
 import { cn } from "@/lib/cn";
@@ -154,6 +155,11 @@ export function OrderDetailView({
           </div>
         </div>
       )}
+
+      {/* Delivery address */}
+      <div className="mt-6">
+        <ShippingAddressCard address={order.shippingAddress} />
+      </div>
 
       {/* Items */}
       <div className="mt-8 rounded-2xl border border-border bg-[var(--card-bg)] p-6">

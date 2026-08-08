@@ -22,10 +22,15 @@ namespace ECommerce.Controllers
 
         [Authorize(Roles = "User")]
         [HttpPost("create")]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create([FromBody] CreateOrderDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _orderService.CreateOrderFromCartAsync(userId);
+            var result = await _orderService.CreateOrderFromCartAsync(userId, dto);
             return Ok(result);
         }
 

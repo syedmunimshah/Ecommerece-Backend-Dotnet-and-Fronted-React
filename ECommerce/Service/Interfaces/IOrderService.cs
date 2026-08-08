@@ -6,7 +6,7 @@ namespace Service.Interfaces
 {
     public interface IOrderService
     {
-        Task<OrderDto> CreateOrderFromCartAsync(int userId);
+        Task<OrderDto> CreateOrderFromCartAsync(int userId, CreateOrderDto dto);
         Task<PagedResponse<OrderDto>> GetOrdersForUserAsync(int userId, PagedRequest request);
         Task<PagedResponse<OrderDto>> GetOrdersForSellerAsync(int sellerUserId, PagedRequest request);
         Task<PagedResponse<OrderDto>> GetAllOrdersAsync(PagedRequest request);
