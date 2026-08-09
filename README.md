@@ -95,6 +95,14 @@ It's built as a portfolio project — every feature below is implemented and wor
 
 ## Screenshots
 
+**Light and dark** — the theme follows the system preference on a first visit and is
+remembered after that. Every colour is a CSS variable, so both themes come from one set of
+components.
+
+| | |
+|---|---|
+| ![Storefront, light theme](docs/screenshots/home.png) | ![Storefront, dark theme](docs/screenshots/home-dark.png) |
+
 **Products sold in options** — each size carries its own price and stock, so the page shows a
 "from" price until one is picked, and the stock line follows the selection.
 
@@ -234,6 +242,11 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+> The frontend proxies `/bff` to whatever `BACKEND_API_URL` points at, which defaults to
+> `http://localhost:5241` — the port the `dotnet run` profiles use. Launching the API from
+> Visual Studio under **IIS Express** instead puts it on a different port, and every request
+> through the proxy answers 500 until the two agree.
 
 ### Demo accounts
 
