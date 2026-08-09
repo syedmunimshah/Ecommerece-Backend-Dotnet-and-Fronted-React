@@ -24,6 +24,10 @@
   --border-rgb: 229 231 235;
   --muted-rgb: 107 114 128;
   --seller-rgb: 15 92 74;
+  --nav-bg-rgb: 255 255 255;
+  --card-bg-rgb: 255 255 255;
+  --auth-from-rgb: 251 250 249;
+  --auth-to-rgb: 237 234 230;
   --nav-bg: #ffffff;
   --nav-text: #111827;
   --hero-wave: #ffffff;
@@ -95,6 +99,10 @@
   --border-rgb: 38 38 41;
   --muted-rgb: 154 154 151;
   --seller-rgb: 45 212 160;
+  --nav-bg-rgb: 14 14 16;
+  --card-bg-rgb: 20 20 22;
+  --auth-from-rgb: 10 10 12;
+  --auth-to-rgb: 23 19 15;
   --nav-bg: #0E0E10;
   --nav-text: #f9fafb;
   --hero-wave: #0A0A0C;

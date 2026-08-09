@@ -5,6 +5,10 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./features/**/*.{js,ts,jsx,tsx,mdx}",
+    // Content files hold class names too (HOME_CATEGORIES ships its own icon colors).
+    // Leave this out and Tailwind never emits those classes — the icons render
+    // uncoloured, but only for the swatches no other file happens to use.
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   darkMode: ["class", '[data-theme="dark"]'],
   theme: {
@@ -21,6 +25,10 @@ const config: Config = {
         border: "rgb(var(--border-rgb) / <alpha-value>)",
         accent: "rgb(var(--accent-rgb) / <alpha-value>)",
         seller: "rgb(var(--seller-rgb) / <alpha-value>)",
+        nav: "rgb(var(--nav-bg-rgb) / <alpha-value>)",
+        card: "rgb(var(--card-bg-rgb) / <alpha-value>)",
+        "auth-from": "rgb(var(--auth-from-rgb) / <alpha-value>)",
+        "auth-to": "rgb(var(--auth-to-rgb) / <alpha-value>)",
         "accent-foreground": "var(--accent-foreground)",
         "accent-hover": "var(--accent-hover)",
         "accent-soft": "var(--accent-soft)",

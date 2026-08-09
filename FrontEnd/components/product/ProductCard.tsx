@@ -44,7 +44,7 @@ export function ProductCard({ product }: { product: Product }) {
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); toggle(product.id); }}
-          className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-[var(--card-bg)]/80 shadow-sm backdrop-blur transition-transform hover:scale-110"
+          className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-card/80 shadow-sm backdrop-blur transition-transform hover:scale-110"
           aria-label="Toggle wishlist"
         >
           <Heart className={cn("h-4 w-4 transition-colors", wished ? "fill-red-500 text-red-500" : "text-muted")} />

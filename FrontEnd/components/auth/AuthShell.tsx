@@ -55,7 +55,7 @@ function AuthBackground({ mouse }: { mouse: { x: number; y: number } }) {
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
       />
 
-      <div className="absolute inset-0 bg-gradient-to-t from-[var(--auth-from)]/90 via-transparent to-[var(--auth-to)]/50" />
+      <div className="absolute inset-0 bg-gradient-to-t from-auth-from/90 via-transparent to-auth-to/50" />
     </div>
   );
 }

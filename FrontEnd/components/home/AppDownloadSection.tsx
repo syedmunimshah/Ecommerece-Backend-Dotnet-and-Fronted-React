@@ -22,6 +22,8 @@ function PlayStoreIcon({ className }: { className?: string }) {
   );
 }
 
+// A miniature of the actual storefront rather than grey blocks: empty placeholder
+// rectangles inside a phone frame read as a screenshot that failed to load.
 function PhoneMockup() {
   return (
     <div className="relative mx-auto w-[220px] sm:w-[260px]">
@@ -29,13 +31,42 @@ function PhoneMockup() {
         <div className="relative overflow-hidden rounded-[1.4rem] bg-[var(--app-phone-screen)]">
           {/* camera notch */}
           <div className="absolute right-4 top-3 z-10 h-2.5 w-2.5 rounded-full bg-[var(--app-phone-notch)]" />
-          {/* placeholder UI */}
-          <div className="space-y-3 p-5 pt-8">
-            <div className="h-28 rounded-xl bg-[var(--app-phone-placeholder)]" />
-            <div className="h-2 w-3/4 rounded-full bg-[var(--app-phone-placeholder)]" />
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="h-16 rounded-xl bg-[var(--app-phone-placeholder)]" />
-              <div className="h-16 rounded-xl bg-[var(--app-phone-placeholder)]" />
+
+          <div className="space-y-3 p-4 pt-7">
+            {/* app bar */}
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 rotate-45 rounded-[3px] bg-accent" />
+              <div className="h-1.5 w-14 rounded-full bg-[#111827]/70" />
+              <div className="ml-auto h-4 w-4 rounded-full bg-[var(--app-phone-placeholder)]" />
+            </div>
+
+            {/* search pill */}
+            <div className="flex h-6 items-center gap-1.5 rounded-full bg-[var(--app-phone-placeholder)] px-2.5">
+              <div className="h-2 w-2 rounded-full border border-[#111827]/40" />
+              <div className="h-1 w-16 rounded-full bg-[#111827]/25" />
+            </div>
+
+            {/* promo banner */}
+            <div className="rounded-xl bg-accent p-3">
+              <div className="h-1.5 w-20 rounded-full bg-white/85" />
+              <div className="mt-1.5 h-1 w-12 rounded-full bg-white/55" />
+              <div className="mt-2.5 h-4 w-14 rounded-full bg-white/90" />
+            </div>
+
+            {/* product grid */}
+            <div className="grid grid-cols-2 gap-2">
+              {[0, 1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-black/5"
+                >
+                  <div className="h-9 bg-[var(--app-phone-placeholder)]" />
+                  <div className="space-y-1 p-1.5">
+                    <div className="h-1 w-full rounded-full bg-[#111827]/25" />
+                    <div className="h-1.5 w-8 rounded-full bg-accent/80" />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
